@@ -50,10 +50,14 @@ Config is via env vars; see `.env.example`. Production: `PUBLIC_BASE_URL=https:/
 Docker: `docker build -t stillcurrent . && docker run -p 7860:7860 -e PUBLIC_BASE_URL=https://... stillcurrent`
 (the image listens on `${PORT}`, default 7860; platforms that inject `PORT`, such as Render, override it).
 
-## Deploy (Render, free)
-`render.yaml` is a Render Blueprint for one free Docker web service (health check `/health`). Render → New → Blueprint → this repo,
-or New → Web Service → Docker, plan Free. Set `PUBLIC_BASE_URL=https://<service>.onrender.com` (falls back to Render's
-`RENDER_EXTERNAL_URL` if empty) and `CONTACT_EMAIL`. Free instances sleep after 15 min idle (~1 min cold start).
+## Deploy
+**Cloudflare Workers (free plan, no card):** `worker/` is a TypeScript port of this service using the official x402 v2 TS SDK.
+It has the same routes, prices and check logic. See [`worker/README.md`](worker/README.md); deploy with
+`CLOUDFLARE_API_TOKEN=... npx wrangler deploy` from `worker/`.
+
+**Docker (any container host):** `render.yaml` is a Render Blueprint for one Docker web service (health check `/health`). Set
+`PUBLIC_BASE_URL=https://<host>` (on Render it falls back to `RENDER_EXTERNAL_URL` if empty) and `CONTACT_EMAIL`. Render's
+free instances sleep after 15 min idle (~1 min cold start).
 
 ## Tests
 ```bash
@@ -78,7 +82,7 @@ or New → Web Service → Docker, plan Free. Set `PUBLIC_BASE_URL=https://<serv
 ## Layout
 `app/main.py` (FastAPI app, x402 gate, discovery routes) · `app/checks.py` (URL/citation logic, archive.org, legislation.gov.uk)
 · `app/adapters.py` (Wikipedia) · `app/fetcher.py` (safe fetch) · `app/textutil.py` (text/date extraction) · `app/config.py`
-· `docs/402-sample.txt` (decoded 402 challenge)
+· `docs/402-sample.txt` (decoded 402 challenge) · `worker/` (Cloudflare Workers port, TypeScript)
 
 ## License
 MIT

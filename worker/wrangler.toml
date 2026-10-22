@@ -1,0 +1,23 @@
+# Cloudflare Workers (free plan) config for StillCurrent.
+# Deploy: CLOUDFLARE_API_TOKEN=... npx wrangler deploy   (served at https://stillcurrent.<your-subdomain>.workers.dev)
+name = "stillcurrent"
+main = "src/index.ts"
+compatibility_date = "2026-01-15"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = false
+
+[observability]
+enabled = true
+
+[vars]
+CONTACT_EMAIL = "something+agent@mail.grokbot.com"
+PAY_TO = "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700"
+X402_NETWORK = "eip155:8453"
+FACILITATOR_URL = "https://facilitator.payai.network"
+PRICE_URL_CHECK = "$0.01"
+PRICE_CITATION_CHECK = "$0.02"
+X402_DISABLED = "0"
+DEMO_ENABLED = "1"
+# PUBLIC_BASE_URL: optional. When empty the request origin is used, which on Workers is already the
+# public https URL (https://stillcurrent.<subdomain>.workers.dev). Set it once a custom domain is used.
