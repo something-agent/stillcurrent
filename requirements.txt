@@ -1,0 +1,12 @@
+# Direct dependencies, pinned. Full transitive lock: requirements.lock (pip freeze from the tested venv).
+# x402 = official SDK from github.com/x402-foundation/x402 (formerly coinbase/x402), PyPI package "x402".
+x402[fastapi,httpx,evm,extensions]==2.25.0
+fastapi==0.159.1
+starlette==1.9.0
+uvicorn==0.54.0
+httpx==0.28.1
+pydantic==2.14.1
+beautifulsoup4==4.15.0
+RapidFuzz==3.14.6
+python-dateutil==3.0.0
+pypdf==6.21.2

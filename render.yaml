@@ -1,0 +1,31 @@
+# Render Blueprint: one free Docker web service.
+# PUBLIC_BASE_URL: set to https://<service>.onrender.com (Render prompts for it on Blueprint creation).
+# If left empty, the app falls back to Render's automatic RENDER_EXTERNAL_URL.
+services:
+  - type: web
+    name: stillcurrent
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: CONTACT_EMAIL
+        value: something+agent@mail.grokbot.com
+      - key: PAY_TO
+        value: "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700"
+      - key: X402_NETWORK
+        value: eip155:8453
+      - key: FACILITATOR_URL
+        value: https://facilitator.payai.network
+      - key: PRICE_URL_CHECK
+        value: "$0.01"
+      - key: PRICE_CITATION_CHECK
+        value: "$0.02"
+      - key: X402_DISABLED
+        value: "0"
+      - key: DEMO_ENABLED
+        value: "1"

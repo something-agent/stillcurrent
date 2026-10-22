@@ -1,0 +1,418 @@
+=== POST http://127.0.0.1:8402/check/url (no payment) ===
+HTTP/1.1 402 Payment Required
+--- body
+{"x402Version":2,"error":"Payment required","message":"StillCurrent /check/url costs $0.01 in USDC on eip155:8453. Payment requirements are in the PAYMENT-REQUIRED response header (base64-encoded JSON).","accepts":[{"scheme":"exact","network":"eip155:8453","asset":"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913","amount":"10000","payTo":"0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700","maxTimeoutSeconds":300,"extra":{"name":"USD Coin","version":"2"}}],"docs":"/"}
+--- PAYMENT-REQUIRED header (decoded)
+{
+    "x402Version": 2,
+    "error": "Payment required",
+    "resource": {
+        "url": "http://127.0.0.1:8402/check/url",
+        "description": "Checks whether a URL (source, citation or dataset) is still alive and current: HTTP status and redirect chain, soft-404 / parked-domain / redirect-to-homepage detection, last-updated date from metadata or page text, latest archive.org snapshot, and a verdict (live, live_stale, dead, moved_to_homepage, soft_404, blocked, ...) with evidence.",
+        "mimeType": "application/json",
+        "serviceName": "StillCurrent",
+        "tags": [
+            "citations",
+            "link-checking",
+            "fact-checking",
+            "freshness",
+            "research"
+        ]
+    },
+    "accepts": [
+        {
+            "scheme": "exact",
+            "network": "eip155:8453",
+            "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "amount": "10000",
+            "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+            "maxTimeoutSeconds": 300,
+            "extra": {
+                "name": "USD Coin",
+                "version": "2"
+            }
+        }
+    ],
+    "extensions": {
+        "bazaar": {
+            "info": {
+                "input": {
+                    "type": "http",
+                    "bodyType": "json",
+                    "body": {
+                        "url": "https://www.cdc.gov/nchs/fastats/life-expectancy.htm",
+                        "stale_after_days": 365
+                    },
+                    "method": "POST"
+                },
+                "output": {
+                    "type": "json",
+                    "example": {
+                        "verdict": "live",
+                        "freshness": "fresh",
+                        "usable_as_citation": true,
+                        "evidence": [
+                            "HTTP 200 after 0 redirect(s)",
+                            "last updated 2026-09-29 (23 days ago, source text['last reviewed'], confidence medium)",
+                            "latest good archive.org snapshot 2026-10-16"
+                        ]
+                    }
+                }
+            },
+            "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "input": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "const": "http"
+                            },
+                            "method": {
+                                "type": "string",
+                                "enum": [
+                                    "POST",
+                                    "PUT",
+                                    "PATCH"
+                                ]
+                            },
+                            "bodyType": {
+                                "type": "string",
+                                "enum": [
+                                    "json",
+                                    "form-data",
+                                    "text"
+                                ]
+                            },
+                            "body": {
+                                "type": "object",
+                                "properties": {
+                                    "url": {
+                                        "description": "Absolute http(s) URL of the source, citation or dataset to check.",
+                                        "maxLength": 2048,
+                                        "title": "Url",
+                                        "type": "string"
+                                    },
+                                    "stale_after_days": {
+                                        "default": 365,
+                                        "description": "Age (days since last update) after which a live page is reported as stale.",
+                                        "maximum": 36500,
+                                        "minimum": 1,
+                                        "title": "Stale After Days",
+                                        "type": "integer"
+                                    },
+                                    "include_archive": {
+                                        "default": true,
+                                        "description": "Look up the latest archive.org Wayback Machine snapshot.",
+                                        "title": "Include Archive",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "method",
+                            "bodyType",
+                            "body"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "output": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "example": {
+                                "type": "object",
+                                "properties": {
+                                    "verdict": {
+                                        "type": "string",
+                                        "enum": [
+                                            "live",
+                                            "live_stale",
+                                            "redirected_cross_domain",
+                                            "moved_to_homepage",
+                                            "soft_404",
+                                            "parked",
+                                            "dead",
+                                            "unreachable",
+                                            "blocked",
+                                            "invalid_target"
+                                        ]
+                                    },
+                                    "freshness": {
+                                        "type": "string",
+                                        "enum": [
+                                            "fresh",
+                                            "stale",
+                                            "possibly_stale",
+                                            "unknown"
+                                        ]
+                                    },
+                                    "usable_as_citation": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "recommended_action": {
+                                        "type": "string"
+                                    },
+                                    "evidence": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "http": {
+                                        "type": "object"
+                                    },
+                                    "dates": {
+                                        "type": "object"
+                                    },
+                                    "archive": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ]
+                                    },
+                                    "wikipedia": {
+                                        "type": "object"
+                                    },
+                                    "legislation_gov_uk": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        },
+                        "required": [
+                            "type"
+                        ]
+                    }
+                },
+                "required": [
+                    "input"
+                ]
+            }
+        }
+    }
+}
+=== POST http://127.0.0.1:8402/check/citation (no payment) ===
+HTTP/1.1 402 Payment Required
+--- body
+{"x402Version":2,"error":"Payment required","message":"StillCurrent /check/citation costs $0.02 in USDC on eip155:8453. Payment requirements are in the PAYMENT-REQUIRED response header (base64-encoded JSON).","accepts":[{"scheme":"exact","network":"eip155:8453","asset":"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913","amount":"20000","payTo":"0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700","maxTimeoutSeconds":300,"extra":{"name":"USD Coin","version":"2"}}],"docs":"/"}
+--- PAYMENT-REQUIRED header (decoded)
+{
+    "x402Version": 2,
+    "error": "Payment required",
+    "resource": {
+        "url": "http://127.0.0.1:8402/check/citation",
+        "description": "Checks whether a quoted sentence or a claim still appears on the cited page (HTML, PDF or text). Exact, punctuation-insensitive and fuzzy quote matching with snippet; lexical claim check incl. every number; compares with the latest archive.org snapshot when missing; includes the full URL liveness/staleness check.",
+        "mimeType": "application/json",
+        "serviceName": "StillCurrent",
+        "tags": [
+            "citations",
+            "link-checking",
+            "fact-checking",
+            "freshness",
+            "research"
+        ]
+    },
+    "accepts": [
+        {
+            "scheme": "exact",
+            "network": "eip155:8453",
+            "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "amount": "20000",
+            "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+            "maxTimeoutSeconds": 300,
+            "extra": {
+                "name": "USD Coin",
+                "version": "2"
+            }
+        }
+    ],
+    "extensions": {
+        "bazaar": {
+            "info": {
+                "input": {
+                    "type": "http",
+                    "bodyType": "json",
+                    "body": {
+                        "url": "https://www.cdc.gov/nchs/fastats/life-expectancy.htm",
+                        "claim": "Life expectancy at birth in the US was 78.4 years"
+                    },
+                    "method": "POST"
+                },
+                "output": {
+                    "type": "json",
+                    "example": {
+                        "verdict": "partially_matched",
+                        "claim_match": {
+                            "verdict": "partially_supported_lexically",
+                            "numbers_found_on_page": [],
+                            "numbers_missing_from_page": [
+                                "78.4"
+                            ]
+                        }
+                    }
+                }
+            },
+            "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "input": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "const": "http"
+                            },
+                            "method": {
+                                "type": "string",
+                                "enum": [
+                                    "POST",
+                                    "PUT",
+                                    "PATCH"
+                                ]
+                            },
+                            "bodyType": {
+                                "type": "string",
+                                "enum": [
+                                    "json",
+                                    "form-data",
+                                    "text"
+                                ]
+                            },
+                            "body": {
+                                "type": "object",
+                                "properties": {
+                                    "url": {
+                                        "description": "Absolute http(s) URL of the cited page (HTML, PDF or plain text).",
+                                        "maxLength": 2048,
+                                        "title": "Url",
+                                        "type": "string"
+                                    },
+                                    "quote": {
+                                        "anyOf": [
+                                            {
+                                                "maxLength": 2000,
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "null"
+                                            }
+                                        ],
+                                        "default": null,
+                                        "description": "Exact text the citation quotes. Matched exactly, then punctuation-insensitive, then fuzzy.",
+                                        "title": "Quote"
+                                    },
+                                    "claim": {
+                                        "anyOf": [
+                                            {
+                                                "maxLength": 1000,
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "null"
+                                            }
+                                        ],
+                                        "default": null,
+                                        "description": "Paraphrased claim attributed to the source. Checked lexically: key terms and every number must appear near each other.",
+                                        "title": "Claim"
+                                    },
+                                    "stale_after_days": {
+                                        "default": 365,
+                                        "maximum": 36500,
+                                        "minimum": 1,
+                                        "title": "Stale After Days",
+                                        "type": "integer"
+                                    },
+                                    "check_archive_if_missing": {
+                                        "default": true,
+                                        "description": "If not found on the live page, also search the latest archive.org snapshot.",
+                                        "title": "Check Archive If Missing",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "method",
+                            "bodyType",
+                            "body"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "output": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "example": {
+                                "type": "object",
+                                "properties": {
+                                    "verdict": {
+                                        "type": "string",
+                                        "enum": [
+                                            "verified",
+                                            "partially_matched",
+                                            "not_found_on_page",
+                                            "only_in_archive",
+                                            "page_unavailable_but_in_archive",
+                                            "page_unavailable",
+                                            "page_unreadable"
+                                        ]
+                                    },
+                                    "explanation": {
+                                        "type": "string"
+                                    },
+                                    "quote_match": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ]
+                                    },
+                                    "claim_match": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ]
+                                    },
+                                    "archive_comparison": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ]
+                                    },
+                                    "url_check": {
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        },
+                        "required": [
+                            "type"
+                        ]
+                    }
+                },
+                "required": [
+                    "input"
+                ]
+            }
+        }
+    }
+}
