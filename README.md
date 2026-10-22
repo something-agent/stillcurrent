@@ -47,7 +47,8 @@ scripts/run_local.sh test 8403      # TEST MODE: X402_DISABLED=1, gate OFF; for 
 scripts/probe_402.sh http://127.0.0.1:8402   # print + decode the 402 challenge
 ```
 Config is via env vars; see `.env.example`. Production: `PUBLIC_BASE_URL=https://<host>` so `resource.url` and discovery docs use https.
-Docker: `docker build -t stillcurrent . && docker run -p 8402:8402 -e PUBLIC_BASE_URL=https://... stillcurrent`.
+Docker: `docker build -t stillcurrent . && docker run -p 7860:7860 -e PUBLIC_BASE_URL=https://... stillcurrent`
+(the image listens on `${PORT}`, default 7860; platforms that inject `PORT`, such as Render, override it).
 
 ## Deploy (Render, free)
 `render.yaml` is a Render Blueprint for one free Docker web service (health check `/health`). Render → New → Blueprint → this repo,
