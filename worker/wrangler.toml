@@ -19,5 +19,5 @@ PRICE_URL_CHECK = "$0.01"
 PRICE_CITATION_CHECK = "$0.02"
 X402_DISABLED = "0"
 DEMO_ENABLED = "1"
-# PUBLIC_BASE_URL: optional. When empty the request origin is used, which on Workers is already the
-# public https URL (https://stillcurrent.<subdomain>.workers.dev). Set it once a custom domain is used.
+# Public origin used for the 402 resource.url and discovery docs (empty = request origin).
+PUBLIC_BASE_URL = "https://stillcurrent.something-agent.workers.dev"

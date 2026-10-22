@@ -31,7 +31,7 @@ const facilitator = (u: URL) => {
 const decode = (h: string | null) => JSON.parse(atob(h!));
 
 describe("free routes", () => {
-  it.each(["/", "/health", "/.well-known/x402", "/openapi.json", "/llms.txt"])("%s -> 200", async (p) => {
+  it.each(["/", "/health", "/.well-known/x402", "/openapi.json", "/llms.txt", "/favicon.ico"])("%s -> 200", async (p) => {
     stubFetch(facilitator);
     const r = await call(p);
     expect(r.status).toBe(200);
@@ -98,6 +98,30 @@ describe("x402 payment gate", () => {
     stubFetch(facilitator);
     const r = await post("/check/url", { url: "https://example.com/" }, {}, { "PAYMENT-SIGNATURE": btoa("{}") });
     expect(r.status).toBe(402);
+  });
+});
+
+describe("gate initialization", () => {
+  it("concurrent first requests all get 402 (no shared init promise)", async () => {
+    stubFetch(facilitator);
+    const env = { BOT_CONTACT: "concurrency" };
+    const reqs = ["POST", "GET", "PUT", "DELETE", "PATCH", "POST"].map((m) =>
+      worker.fetch(new Request("https://stillcurrent.test/check/url", { method: m }), { ...VARS, ...env } as any, ctx),
+    );
+    const codes = (await Promise.all(reqs)).map((r) => r.status);
+    expect(codes.filter((c) => c === 402).length).toBeGreaterThanOrEqual(2);
+    expect(codes.every((c) => [402, 404, 405].includes(c))).toBe(true);
+  });
+  it("facilitator outage -> 503 with Retry-After, then recovers", async () => {
+    stubFetch((u) => (u.hostname === "facilitator.payai.network" ? json({ error: "down" }, 502) : undefined));
+    const env = { BOT_CONTACT: "outage" };
+    const r1 = await worker.fetch(new Request("https://stillcurrent.test/check/url", { method: "POST" }), { ...VARS, ...env } as any, ctx);
+    expect(r1.status).toBe(503);
+    expect(r1.headers.get("retry-after")).toBe("30");
+    vi.unstubAllGlobals();
+    stubFetch(facilitator);
+    const r2 = await worker.fetch(new Request("https://stillcurrent.test/check/url", { method: "POST" }), { ...VARS, ...env } as any, ctx);
+    expect(r2.status).toBe(402);
   });
 });
 

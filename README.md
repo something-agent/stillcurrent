@@ -1,5 +1,8 @@
 # StillCurrent
 
+**Live:** https://stillcurrent.something-agent.workers.dev (Cloudflare Workers, `worker/`) ·
+[x402scan listing](https://www.x402scan.com/server/9230c176-ee43-48a7-a157-c30d3b6ea481)
+
 Pay-per-call checks for AI agents and researchers: **is this URL/source still alive and current?** and **does this citation
 still say what it is quoted for?** Paid per request with [x402](https://www.x402.org/) (USDC on Base). No accounts, no API keys.
 
@@ -51,7 +54,7 @@ Docker: `docker build -t stillcurrent . && docker run -p 7860:7860 -e PUBLIC_BAS
 (the image listens on `${PORT}`, default 7860; platforms that inject `PORT`, such as Render, override it).
 
 ## Deploy
-**Cloudflare Workers (free plan, no card):** `worker/` is a TypeScript port of this service using the official x402 v2 TS SDK.
+**Cloudflare Workers (free plan, no card), live at https://stillcurrent.something-agent.workers.dev:** `worker/` is a TypeScript port of this service using the official x402 v2 TS SDK.
 It has the same routes, prices and check logic. See [`worker/README.md`](worker/README.md); deploy with
 `CLOUDFLARE_API_TOKEN=... npx wrangler deploy` from `worker/`.
 

@@ -1,5 +1,8 @@
 # StillCurrent: Cloudflare Workers port
 
+**Live:** https://stillcurrent.something-agent.workers.dev (for example `curl -si -X POST https://stillcurrent.something-agent.workers.dev/check/url`
+returns the 402 challenge).
+
 A TypeScript port of the Python StillCurrent service (repo root) for the **Cloudflare Workers free plan**. It has the same routes,
 prices, responses and check logic. It uses the official x402 v2 TypeScript SDK (`@x402/hono`, `@x402/core`, `@x402/evm`,
 `@x402/extensions` for Bazaar) with the PayAI facilitator. The receive address is public; the Worker holds no key and never signs.
@@ -24,9 +27,10 @@ npx wrangler dev --var X402_DISABLED:1 --port 8788   # TEST MODE (gate off), loc
 
 ## Deploy
 ```bash
-CLOUDFLARE_API_TOKEN=<token with the "Edit Cloudflare Workers" template> npx wrangler deploy
+CLOUDFLARE_API_TOKEN=<token with the "Edit Cloudflare Workers" template> CLOUDFLARE_ACCOUNT_ID=<account id> npx wrangler deploy
 ```
-Then `curl -si -X POST https://stillcurrent.<subdomain>.workers.dev/check/url -H 'content-type: application/json' -d '{}'`
+`PUBLIC_BASE_URL` in `wrangler.toml` must match the deployed origin. Afterwards,
+`curl -si -X POST https://stillcurrent.something-agent.workers.dev/check/url -H 'content-type: application/json' -d '{}'`
 should return `402` with a `PAYMENT-REQUIRED` header.
 
 ## Workers free-plan fit
@@ -47,6 +51,10 @@ should return `402` with a `PAYMENT-REQUIRED` header.
   point or two; the bands are the same (≥ 90 fuzzy, ≥ 75 partial, ≥ 60 weak).
 * **DNS:** Workers have no resolver API, so NXDOMAIN is detected with DNS-over-HTTPS (cloudflare-dns.com) after a failed fetch.
   Private and loopback IP literals, `localhost`, and single-label hosts are refused before any fetch, and again on every redirect hop.
+* **Payment-gate init:** each request fetches the facilitator's `/supported` on its own until one has initialized the gate. The
+  SDK default shares a single init promise across requests, and on Workers that hung concurrent first requests.
+* **Cloudflare edge:** `workers.dev` blocks the default `Python-urllib/*` User-Agent with error 1010 before the Worker runs.
+  Clients using `requests`, `httpx`, Node, Go or curl are not affected.
 * **Log noise:** the Bazaar extension's Ajv schema compiler cannot run under Workers (it needs code generation), so a
   validation warning is logged. The discovery extension is still emitted in full in the 402 header.
 

@@ -72,22 +72,33 @@ export function buildApp(s: Settings): Hono {
   if (s.paymentsDisabled) {
     console.warn("X402_DISABLED=1: PAYMENT GATE IS OFF (test mode). Never expose this instance publicly.");
   } else {
-    const facilitator = new HTTPFacilitatorClient({ url: s.facilitatorUrl, timeoutMs: 20_000 });
-    const server = new x402ResourceServer(facilitator).register(s.network, new ExactEvmScheme());
-    server.registerExtension(bazaarResourceServerExtension);
     // Runs before the route handlers, so unpaid probes (even with empty bodies) get 402, not 422.
-    // Built on the first paid-route request, not at app creation: the SDK starts a facilitator
-    // /supported fetch when the middleware is created, and on Workers that I/O must belong to a
-    // request that awaits it (a fetch started inside an unrelated, already-finished request hangs).
-    let gate: MiddlewareHandler | null = null;
+    //
+    // Workers rule: a promise whose I/O was started by one request must not be awaited by another
+    // (the waiter can hang forever, e.g. when the first request is cancelled). The SDK's default
+    // middleware shares one facilitator /supported promise across requests, which hung concurrent
+    // first requests in production. So until the gate is ready, every request builds its own
+    // resource server, fetches /supported itself and runs the middleware with
+    // syncFacilitatorOnStart=false. The first request that completes this caches the ready gate;
+    // after that no cross-request promises remain (the SDK's one-time Bazaar setup promise has
+    // already been awaited inside that request).
+    const routes = x402Routes(s);
+    let ready: MiddlewareHandler | null = null;
     app.use("/check/*", async (c, next) => {
-      if (!gate) gate = paymentMiddleware(x402Routes(s), server);
+      if (ready) return ready(c, next);
+      const facilitator = new HTTPFacilitatorClient({ url: s.facilitatorUrl, timeoutMs: 20_000 });
+      const server = new x402ResourceServer(facilitator).register(s.network, new ExactEvmScheme());
+      server.registerExtension(bazaarResourceServerExtension);
       try {
-        return await gate(c, next);
+        await server.initialize();
       } catch (e) {
-        gate = null; // e.g. facilitator unreachable: rebuild on the next request
-        throw e;
+        console.error("facilitator /supported failed", e);
+        return c.json({ error: "payment facilitator unavailable, retry shortly" }, 503, { "Retry-After": "30" });
       }
+      const mw = paymentMiddleware(routes, server, undefined, undefined, false);
+      const res = await mw(c, next);
+      ready ??= mw;
+      return res;
     });
   }
 
@@ -126,6 +137,11 @@ export function buildApp(s: Settings): Hono {
     });
   });
 
+  // Small SVG icon (directories such as x402scan show the origin favicon).
+  const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f766e"/><path d="M18 33l9 9 19-20" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const icon = (c: Context) => c.body(FAVICON, 200, { "content-type": "image/svg+xml", "cache-control": "public, max-age=86400" });
+  app.get("/favicon.ico", icon);
+  app.get("/favicon.svg", icon);
   app.get("/health", (c) => c.json({ ok: true, time: new Date().toISOString(), payments: !s.paymentsDisabled }));
 
   app.get("/.well-known/x402", (c) => {
