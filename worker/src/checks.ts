@@ -673,6 +673,7 @@ export async function checkCitation(
     claim_match: liveC,
     archive_comparison: archived,
     url_check: urlResult,
+    checked_at: tu.iso(new Date()),
     took_ms: Date.now() - t0,
   });
   return out;

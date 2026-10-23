@@ -90,8 +90,18 @@ describe("x402 payment gate", () => {
 
   it("gate runs before validation (invalid body still gets 402)", async () => {
     stubFetch(facilitator);
-    expect((await post("/check/url", "{not json")).status).toBe(402);
     expect((await post("/check/citation", {})).status).toBe(402);
+    expect((await post("/check/url", "")).status).toBe(402);
+  });
+  it("non-empty invalid input gets a free 422 before the payment challenge", async () => {
+    stubFetch(facilitator);
+    expect((await post("/check/url", "{not json")).status).toBe(422);
+    expect((await post("/check/url", { url: 123 })).status).toBe(422);
+    expect((await post("/check/url", { foo: "bar" })).status).toBe(422);
+    const r = await post("/check/citation", { url: "https://example.com/" });
+    expect(r.status).toBe(422);
+    expect(r.headers.get("PAYMENT-REQUIRED")).toBeNull();
+    expect((await post("/check/url", { url: "https://example.com/" })).status).toBe(402);
   });
 
   it("a bogus PAYMENT-SIGNATURE is rejected with 402", async () => {

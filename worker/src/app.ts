@@ -84,6 +84,14 @@ export function buildApp(s: Settings): Hono {
     // already been awaited inside that request).
     const routes = x402Routes(s);
     let ready: MiddlewareHandler | null = null;
+    // Free pre-check: a non-empty body that is malformed or fails validation gets 422 BEFORE the
+    // payment challenge, so a buyer never pays to learn their input was invalid. An empty body or
+    // an empty object `{}` still gets the 402 challenge (discovery probes send those).
+    app.use("/check/*", async (c, next) => {
+      if (c.req.method !== "POST") return next();
+      const v = await prevalidate(c);
+      return v ?? next();
+    });
     app.use("/check/*", async (c, next) => {
       if (ready) return ready(c, next);
       const facilitator = new HTTPFacilitatorClient({ url: s.facilitatorUrl, timeoutMs: 20_000 });
@@ -100,6 +108,18 @@ export function buildApp(s: Settings): Hono {
       ready ??= mw;
       return res;
     });
+  }
+
+  async function prevalidate(c: Context): Promise<Response | null> {
+    const t = (await c.req.text()).trim();
+    if (!t) return null;
+    let raw: unknown;
+    try { raw = JSON.parse(t); } catch { return invalidJson(c); }
+    if (raw && typeof raw === "object" && !Array.isArray(raw) && Object.keys(raw as object).length === 0) return null;
+    const path = new URL(c.req.url).pathname.replace(/\/+$/, "");
+    const v = path === "/check/url" ? validateUrlCheck(raw) : path === "/check/citation" ? validateCitationCheck(raw) : null;
+    if (v && !v.ok) return c.json({ detail: v.errors, charged: false }, 422);
+    return null;
   }
 
   app.onError((err, c) => {
@@ -130,7 +150,9 @@ export function buildApp(s: Settings): Hono {
         "GET /llms.txt": "plain-text summary", "GET /demo": "sample /check/url output for https://example.com (cached)", "GET /health": "health" },
       notes: [
         "A request without payment receives HTTP 402 with the payment requirements in the PAYMENT-REQUIRED header (base64 JSON).",
-        "Payment is settled only when the check returns HTTP 200; invalid input (422) is not charged.",
+        "Invalid input (malformed JSON or failed validation) is rejected with HTTP 422 before the payment challenge, so it costs nothing. An empty body or {} gets the 402 challenge.",
+        "Payment is settled only when the check returns HTTP 200.",
+        "Every result carries checked_at (UTC, when the check ran) and took_ms; treat a cached result as a snapshot from checked_at.",
         "Dead, blocked or unreachable target URLs are valid results (HTTP 200) and are charged.",
         "Claim matching is lexical (terms and numbers), not semantic entailment.",
       ],
@@ -174,7 +196,7 @@ export function buildApp(s: Settings): Hono {
           responses: {
             "200": { description: "Successful Response", content: { "application/json": { schema: r.outputSchema, example: r.outputExampleFull } } },
             "402": { description: "Payment Required. x402 v2 payment requirements in the PAYMENT-REQUIRED header (base64 JSON)." },
-            "422": { description: "Validation Error (not charged)" },
+            "422": { description: "Validation Error. Returned before the payment challenge, so it is never charged." },
           },
           "x-payment-info": { protocols: [{ x402: {} }], price: { mode: "fixed", currency: "USD", amount: priceUsd(r.price) }, network: s.network, asset: S.USDC_BASE, payTo: s.payTo },
         },

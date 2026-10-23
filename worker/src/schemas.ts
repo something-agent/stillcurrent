@@ -1,6 +1,6 @@
 /** Static descriptions, examples and JSON schemas (mirrors the Python service). */
 export const SERVICE_NAME = "StillCurrent";
-export const VERSION = "0.2.0-worker";
+export const VERSION = "0.2.1-worker";
 export const SERVICE_DESC =
   "Pay-per-call checks that tell you whether a source is still current: link liveness and staleness, " +
   "and whether a quoted sentence or claim still appears on the cited page (with archive.org fallback).";
@@ -18,6 +18,8 @@ export const URL_OUTPUT_EXAMPLE_FULL = {
     "last updated 2026-09-29 (23 days ago, source text['last reviewed'], confidence medium)",
     "latest good archive.org snapshot 2026-10-16",
   ],
+  checked_at: "2026-10-22T18:00:00Z",
+  took_ms: 412,
   http: { reachable: true, status: 200, final_url: "https://www.cdc.gov/nchs/fastats/life-expectancy.htm",
     redirect_chain: [{ url: "https://www.cdc.gov/nchs/fastats/life-expectancy.htm", status: 200 }] },
   dates: { last_updated: { date: "2026-09-29T00:00:00Z", source: "text['last reviewed']", confidence: "medium", age_days: 23 } },
@@ -27,6 +29,7 @@ export const URL_OUTPUT_EXAMPLE_FULL = {
 export const URL_OUTPUT_EXAMPLE = {
   verdict: URL_OUTPUT_EXAMPLE_FULL.verdict, freshness: URL_OUTPUT_EXAMPLE_FULL.freshness,
   usable_as_citation: URL_OUTPUT_EXAMPLE_FULL.usable_as_citation, evidence: URL_OUTPUT_EXAMPLE_FULL.evidence,
+  checked_at: URL_OUTPUT_EXAMPLE_FULL.checked_at, took_ms: URL_OUTPUT_EXAMPLE_FULL.took_ms,
 };
 export const CIT_INPUT_EXAMPLE = { url: "https://www.cdc.gov/nchs/fastats/life-expectancy.htm", claim: "Life expectancy at birth in the US was 78.4 years" };
 export const CIT_OUTPUT_EXAMPLE_FULL = {
@@ -38,8 +41,10 @@ export const CIT_OUTPUT_EXAMPLE_FULL = {
   quote_match: null,
   archive_comparison: { snapshot_date: "2026-10-16T18:35:00Z" },
   url_check: { verdict: "live", freshness: "fresh" },
+  checked_at: "2026-10-22T18:00:00Z",
+  took_ms: 655,
 };
-export const CIT_OUTPUT_EXAMPLE = { verdict: "partially_matched", claim_match: { verdict: "partially_supported_lexically", numbers_found_on_page: [], numbers_missing_from_page: ["78.4"] } };
+export const CIT_OUTPUT_EXAMPLE = { verdict: "partially_matched", claim_match: { verdict: "partially_supported_lexically", numbers_found_on_page: [], numbers_missing_from_page: ["78.4"] }, checked_at: "2026-10-22T18:00:00Z", took_ms: 655 };
 
 export const VERDICTS_URL = ["live", "live_stale", "redirected_cross_domain", "moved_to_homepage", "soft_404", "parked", "dead", "unreachable", "blocked", "invalid_target"];
 export const VERDICTS_CIT = ["verified", "partially_matched", "not_found_on_page", "only_in_archive", "page_unavailable_but_in_archive", "page_unavailable", "page_unreadable"];
@@ -54,7 +59,10 @@ export const URL_OUTPUT_SCHEMA = {
     evidence: { type: "array", items: { type: "string" } },
     http: { type: "object" }, dates: { type: "object" }, archive: { type: ["object", "null"] },
     wikipedia: { type: "object" }, legislation_gov_uk: { type: "object" },
+    checked_at: { type: "string", format: "date-time", description: "UTC time the check ran. A cached result is a snapshot from this time." },
+    took_ms: { type: "integer" },
   },
+  required: ["verdict", "checked_at"],
 };
 export const CIT_OUTPUT_SCHEMA = {
   type: "object",
@@ -63,7 +71,10 @@ export const CIT_OUTPUT_SCHEMA = {
     explanation: { type: "string" },
     quote_match: { type: ["object", "null"] }, claim_match: { type: ["object", "null"] },
     archive_comparison: { type: ["object", "null"] }, url_check: { type: "object" },
+    checked_at: { type: "string", format: "date-time", description: "UTC time the check ran. A cached result is a snapshot from this time." },
+    took_ms: { type: "integer" },
   },
+  required: ["verdict", "checked_at"],
 };
 
 export const URL_INPUT_SCHEMA = {
