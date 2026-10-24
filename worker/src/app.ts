@@ -231,6 +231,10 @@ Payment: x402 v2, scheme exact, USDC on ${s.network}, payTo ${s.payTo}. Unpaid c
 - POST ${b}/check/citation  ($${p2}/call) body: {"url": "...", "quote": "exact text", "claim": "paraphrase with numbers"}
   Returns verdict (verified | partially_matched | not_found_on_page | only_in_archive | page_unavailable_but_in_archive | page_unavailable | page_unreadable), matched snippet and score, numbers found/missing, archive comparison, and the URL check.
 
+Invalid input (bad JSON, missing or malformed fields) gets a free HTTP 422 with "charged": false, before any payment challenge.
+
+Note: send a named User-Agent header (e.g. "my-agent/1.0"). The workers.dev edge blocks some default library User-Agents (such as Python-urllib) with a Cloudflare 403 (error 1010) before the request reaches this service; that 403 does not mean the service is down.
+
 ## Free
 - GET ${b}/  GET ${b}/.well-known/x402  GET ${b}/openapi.json  GET ${b}/demo
 `);
@@ -253,13 +257,13 @@ Payment: x402 v2, scheme exact, USDC on ${s.network}, payTo ${s.payTo}. Unpaid c
     if (!t.trim()) return undefined;
     try { return JSON.parse(t); } catch { return Symbol.for("invalid"); }
   };
-  const invalidJson = (c: Context) => c.json({ detail: [{ loc: ["body"], msg: "JSON decode error", type: "json_invalid" }] }, 422);
+  const invalidJson = (c: Context) => c.json({ detail: [{ loc: ["body"], msg: "JSON decode error", type: "json_invalid" }], charged: false }, 422);
 
   app.post("/check/url", async (c) => {
     const raw = await readJson(c);
     if (raw === Symbol.for("invalid")) return invalidJson(c);
     const v = validateUrlCheck(raw);
-    if (!v.ok) return c.json({ detail: v.errors }, 422);
+    if (!v.ok) return c.json({ detail: v.errors, charged: false }, 422);
     const { result } = await withTimeout(checkUrl(v.value.url, s, { staleAfterDays: v.value.stale_after_days, includeArchive: v.value.include_archive }), 55_000);
     return c.json(result);
   });
@@ -268,7 +272,7 @@ Payment: x402 v2, scheme exact, USDC on ${s.network}, payTo ${s.payTo}. Unpaid c
     const raw = await readJson(c);
     if (raw === Symbol.for("invalid")) return invalidJson(c);
     const v = validateCitationCheck(raw);
-    if (!v.ok) return c.json({ detail: v.errors }, 422);
+    if (!v.ok) return c.json({ detail: v.errors, charged: false }, 422);
     const r = await withTimeout(checkCitation(v.value.url, v.value.quote, v.value.claim, s, {
       staleAfterDays: v.value.stale_after_days, checkArchiveIfMissing: v.value.check_archive_if_missing }), 58_000);
     return c.json(r);
