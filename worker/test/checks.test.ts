@@ -89,6 +89,15 @@ describe("checkCitation", () => {
     const r = await checkCitation("https://h.example.org/", "opened to traffic in 1932", null, S);
     expect(r.verdict).toBe("verified");
     expect(r.quote_match.match).toBe("exact");
+    expect(r.evidence_kind).toBe("quote_text_match");
+  });
+
+  it("claim-only verified is labelled lexical_claim_match", async () => {
+    stubFetch(noArchive, (u) => (u.hostname === "h.example.org" ? html(PAGE("H", "<p>Atlas shipped 12 units in March. Boreal shipped 30 units in March.</p>")) : undefined));
+    const r = await checkCitation("https://h.example.org/", null, "Atlas shipped 30 units in March", S);
+    expect(r.verdict).toBe("verified");
+    expect(r.evidence_kind).toBe("lexical_claim_match");
+    expect(r.explanation).toContain("not semantic entailment");
   });
 
   it("not_found_on_page", async () => {

@@ -658,7 +658,9 @@ export async function checkCitation(
   if (verdict !== "verified" && archived && (qOk(archived.quote) || (!quote && cOk(archived.claim))))
     verdict = text !== null ? "only_in_archive" : "page_unavailable_but_in_archive";
   const explain: Record<string, string> = {
-    verified: "The quoted text (or all key terms and numbers of the claim) appears on the live page.",
+    verified: quote
+      ? "The quoted text appears on the live page."
+      : "All key terms and numbers of the claim appear near each other on the live page (lexical match only, not semantic entailment: swapped entity-number pairs or negations can still match).",
     partially_matched: "Only a partial / approximate match was found; the wording may have changed or been paraphrased.",
     not_found_on_page: "The quote/claim was not found on the live page.",
     only_in_archive: "Not on the live page, but present in the latest archive.org snapshot; the source content has probably changed.",
@@ -666,8 +668,15 @@ export async function checkCitation(
     page_unavailable: "The page could not be fetched; see url_check for why.",
     page_unreadable: "The page loaded but no text could be extracted (e.g. JavaScript-only page or unsupported format).",
   };
+  // evidence_kind says what kind of evidence backs the verdict, so clients don't silently upgrade a lexical claim match into "claim supported".
+  let evidence_kind: string | null = null;
+  if (verdict === "verified") evidence_kind = quote ? "quote_text_match" : "lexical_claim_match";
+  else if (verdict === "only_in_archive" || verdict === "page_unavailable_but_in_archive")
+    evidence_kind = quote && qOk(archived?.quote) ? "quote_text_match_archive" : "lexical_claim_match_archive";
+  else if (verdict === "partially_matched") evidence_kind = "partial_lexical_match";
   Object.assign(out, {
     verdict,
+    evidence_kind,
     explanation: explain[verdict],
     quote_match: liveQ,
     claim_match: liveC,

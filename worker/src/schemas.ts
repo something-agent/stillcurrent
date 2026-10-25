@@ -1,6 +1,6 @@
 /** Static descriptions, examples and JSON schemas (mirrors the Python service). */
 export const SERVICE_NAME = "StillCurrent";
-export const VERSION = "0.2.2-worker";
+export const VERSION = "0.2.3-worker";
 export const SERVICE_DESC =
   "Pay-per-call checks that tell you whether a source is still current: link liveness and staleness, " +
   "and whether a quoted sentence or claim still appears on the cited page (with archive.org fallback).";
@@ -34,6 +34,7 @@ export const URL_OUTPUT_EXAMPLE = {
 export const CIT_INPUT_EXAMPLE = { url: "https://www.cdc.gov/nchs/fastats/life-expectancy.htm", claim: "Life expectancy at birth in the US was 78.4 years" };
 export const CIT_OUTPUT_EXAMPLE_FULL = {
   verdict: "partially_matched",
+  evidence_kind: "partial_lexical_match",
   explanation: "Only a partial / approximate match was found; the wording may have changed or been paraphrased.",
   claim_match: { verdict: "partially_supported_lexically", best_passage_coverage: 0.667, numbers_in_claim: ["78.4"],
     numbers_found_on_page: [], numbers_missing_from_page: ["78.4"],
@@ -68,6 +69,8 @@ export const CIT_OUTPUT_SCHEMA = {
   type: "object",
   properties: {
     verdict: { type: "string", enum: VERDICTS_CIT },
+    evidence_kind: { type: ["string", "null"], enum: ["quote_text_match", "lexical_claim_match", "quote_text_match_archive", "lexical_claim_match_archive", "partial_lexical_match", null],
+      description: "What backs the verdict. lexical_claim_match means the claim's terms and numbers co-occur on the page; it is NOT semantic support (an entity-number swap can still match). Treat it as retrieval, not proof." },
     explanation: { type: "string" },
     quote_match: { type: ["object", "null"] }, claim_match: { type: ["object", "null"] },
     archive_comparison: { type: ["object", "null"] }, url_check: { type: "object" },

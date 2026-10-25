@@ -37,6 +37,12 @@ describe("matchClaim", () => {
     expect(r.verdict).toBe("partially_supported_lexically");
     expect(r.numbers_missing_from_page).toEqual(["78.4"]);
   });
+  it("known limit: an entity-number swap still matches lexically (scope regression control)", () => {
+    const src = "Atlas shipped 12 units. Boreal shipped 30 units.";
+    expect(matchClaim("Atlas shipped 12 units", src).verdict).toBe("supported_lexically");
+    // Swapped roles: every token and number is present, so a lexical matcher cannot tell. Documented via evidence_kind=lexical_claim_match.
+    expect(matchClaim("Atlas shipped 30 units", src).verdict).toBe("supported_lexically");
+  });
   it("not_found when unrelated", () => {
     expect(matchClaim("Zebras migrate across the Serengeti", TEXT).verdict).toBe("not_found");
   });
