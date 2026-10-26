@@ -67,3 +67,24 @@ export function validateCitationCheck(raw: unknown): { ok: true; value: Citation
     errs.push({ loc: ["body"], msg: "Value error, provide at least one of 'quote' or 'claim'", type: "value_error" });
   return errs.length ? { ok: false, errors: errs } : { ok: true, value };
 }
+
+export interface UrlsCheckRequest { urls: string[] }
+
+export function validateUrlsCheck(raw: unknown, maxUrls = 25): { ok: true; value: UrlsCheckRequest } | { ok: false; errors: ValidationError[] } {
+  const errs: ValidationError[] = [];
+  const body = asObject(raw, errs);
+  if (!body) return { ok: false, errors: errs };
+  const v = body.urls;
+  if (v === undefined || v === null) return { ok: false, errors: [{ loc: ["body", "urls"], msg: "Field required", type: "missing" }] };
+  if (!Array.isArray(v)) return { ok: false, errors: [{ loc: ["body", "urls"], msg: "Input should be a valid list", type: "list_type" }] };
+  if (v.length < 1) errs.push({ loc: ["body", "urls"], msg: "List should have at least 1 item", type: "too_short" });
+  if (v.length > maxUrls) errs.push({ loc: ["body", "urls"], msg: `List should have at most ${maxUrls} items`, type: "too_long" });
+  const urls: string[] = [];
+  v.slice(0, maxUrls).forEach((u: unknown, i: number) => {
+    const e: ValidationError[] = [];
+    const t = checkUrlField({ url: u }, e);
+    for (const x of e) errs.push({ ...x, loc: ["body", "urls", i] });
+    urls.push(t);
+  });
+  return errs.length ? { ok: false, errors: errs } : { ok: true, value: { urls } };
+}

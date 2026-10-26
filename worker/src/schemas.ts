@@ -1,6 +1,6 @@
 /** Static descriptions, examples and JSON schemas (mirrors the Python service). */
 export const SERVICE_NAME = "StillCurrent";
-export const VERSION = "0.2.3-worker";
+export const VERSION = "0.3.0-worker";
 export const SERVICE_DESC =
   "Pay-per-call checks that tell you whether a source is still current: link liveness and staleness, " +
   "and whether a quoted sentence or claim still appears on the cited page (with archive.org fallback).";
@@ -109,4 +109,43 @@ export const CIT_DESCRIPTION =
   "Checks whether a quoted sentence or a claim still appears on the cited page (HTML, PDF or text). Exact, " +
   "punctuation-insensitive and fuzzy quote matching with snippet; lexical claim check incl. every number; compares with " +
   "the latest archive.org snapshot when missing; includes the full URL liveness/staleness check.";
+export const BATCH_INPUT_EXAMPLE = { urls: ["https://example.com/", "https://www.x402.org/", "https://example.com/missing-page"] };
+export const BATCH_OUTPUT_EXAMPLE_FULL = {
+  checked: 3, unique: 3, ok: 2, not_ok: 1, incomplete: 0, verdict_counts: { live: 1, redirected: 1, dead: 1 },
+  results: [
+    { url: "https://example.com/", verdict: "live", ok: true, status: 200, final_url: "https://example.com/", redirect_chain: [{ url: "https://example.com/", status: 200 }], title: "Example Domain", content_type: "text/html", error: null, complete: true, elapsed_ms: 120 },
+    { url: "https://www.x402.org/", verdict: "redirected", ok: true, status: 200, final_url: "https://x402.org/", redirect_chain: [{ url: "https://www.x402.org/", status: 301 }, { url: "https://x402.org/", status: 200 }], title: "x402", content_type: "text/html", error: null, complete: true, elapsed_ms: 210 },
+    { url: "https://example.com/missing-page", verdict: "dead", ok: false, status: 404, final_url: "https://example.com/missing-page", redirect_chain: [{ url: "https://example.com/missing-page", status: 404 }], title: null, content_type: "text/html", error: null, complete: true, elapsed_ms: 98 },
+  ],
+  note: "Batch triage: one GET per hop (max 4), no archive.org lookup or date extraction. Use POST /check/url on any result for the full check.",
+  checked_at: "2026-10-26T15:00:00Z", took_ms: 230,
+};
+export const BATCH_OUTPUT_EXAMPLE = { checked: 3, ok: 2, not_ok: 1, incomplete: 0, verdict_counts: { live: 1, redirected: 1, dead: 1 },
+  results: [{ url: "https://example.com/missing-page", verdict: "dead", ok: false, status: 404, complete: true }], checked_at: "2026-10-26T15:00:00Z", took_ms: 230 };
+export const VERDICTS_BATCH = ["live", "redirected", "redirected_cross_domain", "moved_to_homepage", "dead", "blocked", "server_error", "client_error", "unreachable", "invalid_target", "redirect_not_followed"];
+export const BATCH_INPUT_SCHEMA = {
+  type: "object",
+  properties: {
+    urls: { type: "array", minItems: 1, maxItems: 25, items: { type: "string", maxLength: 2048 }, description: "1 to 25 absolute http(s) URLs. Duplicates are checked once.", title: "Urls" },
+  },
+  required: ["urls"],
+};
+export const BATCH_OUTPUT_SCHEMA = {
+  type: "object",
+  properties: {
+    checked: { type: "integer" }, unique: { type: "integer" }, ok: { type: "integer" }, not_ok: { type: "integer" },
+    incomplete: { type: "integer", description: "URLs whose redirect chain could not be fully followed within the per-call request budget (see pending_location)." },
+    verdict_counts: { type: "object" },
+    results: { type: "array", items: { type: "object", properties: { url: { type: "string" }, verdict: { type: "string", enum: VERDICTS_BATCH }, ok: { type: "boolean" },
+      status: { type: ["integer", "null"] }, final_url: { type: ["string", "null"] }, redirect_chain: { type: "array" }, title: { type: ["string", "null"] },
+      complete: { type: "boolean" }, pending_location: { type: "string" } }, required: ["url", "verdict", "ok", "complete"] } },
+    checked_at: { type: "string", format: "date-time" }, took_ms: { type: "integer" },
+  },
+  required: ["checked", "results", "checked_at"],
+};
+export const BATCH_DESCRIPTION =
+  "Link triage for up to 25 URLs in one call: HTTP status, redirect chain (up to 4 hops), page title, and a verdict per URL " +
+  "(live, redirected, redirected_cross_domain, moved_to_homepage, dead, blocked, server_error, unreachable, ...). Lighter than " +
+  "/check/url: no archive.org lookup or last-updated date. Use it to find which links in a document need a full check.";
+if (BATCH_DESCRIPTION.length > 500) throw new Error("description too long");
 if (URL_DESCRIPTION.length > 500 || CIT_DESCRIPTION.length > 500) throw new Error("description too long");

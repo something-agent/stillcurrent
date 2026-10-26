@@ -17,6 +17,11 @@ X402_NETWORK = "eip155:8453"
 FACILITATOR_URL = "https://facilitator.payai.network"
 PRICE_URL_CHECK = "$0.01"
 PRICE_CITATION_CHECK = "$0.02"
+PRICE_URL_BATCH = "$0.10"
+# x402scan ownership proof: EIP-191 signature of the origin string by PAY_TO (public, not a secret).
+OWNERSHIP_PROOFS = "0xe15ab87eb6ecc98ea36e3d7dfa17b5f2d659ef47d6e698afe443ac137db303cc6f6127444c850691a25300d4b7ce27a04b6885e8f32e76d50a5223ac532199c31c"
+# ERC-8004 IdentityRegistry agentId on Base (empty until registered).
+ERC8004_AGENT_ID = "1135140"
 X402_DISABLED = "0"
 DEMO_ENABLED = "1"
 # Public origin used for the 402 resource.url and discovery docs (empty = request origin).

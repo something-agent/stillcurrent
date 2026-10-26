@@ -5,10 +5,11 @@ import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { paymentMiddleware, x402ResourceServer } from "@x402/hono";
+import { BATCH_MAX_URLS, checkUrls } from "./batch";
 import { checkCitation, checkUrl } from "./checks";
 import type { Settings } from "./config";
 import * as S from "./schemas";
-import { validateCitationCheck, validateUrlCheck } from "./validate";
+import { validateCitationCheck, validateUrlCheck, validateUrlsCheck } from "./validate";
 
 const priceUsd = (p: string) => p.replace(/^\$/, "");
 const atomic = (p: string) => String(Math.round(parseFloat(priceUsd(p)) * 1_000_000));
@@ -24,13 +25,15 @@ export function paidRoutes(s: Settings): Record<string, PaidRoute> {
       outputExample: S.URL_OUTPUT_EXAMPLE, outputExampleFull: S.URL_OUTPUT_EXAMPLE_FULL, outputSchema: S.URL_OUTPUT_SCHEMA, summary: "URL liveness + freshness check" },
     "/check/citation": { price: s.priceCitationCheck, description: S.CIT_DESCRIPTION, inputExample: S.CIT_INPUT_EXAMPLE, inputSchema: S.CIT_INPUT_SCHEMA,
       outputExample: S.CIT_OUTPUT_EXAMPLE, outputExampleFull: S.CIT_OUTPUT_EXAMPLE_FULL, outputSchema: S.CIT_OUTPUT_SCHEMA, summary: "Quote / claim still on the cited page?" },
+    "/check/urls": { price: s.priceUrlBatch, description: S.BATCH_DESCRIPTION, inputExample: S.BATCH_INPUT_EXAMPLE, inputSchema: S.BATCH_INPUT_SCHEMA,
+      outputExample: S.BATCH_OUTPUT_EXAMPLE, outputExampleFull: S.BATCH_OUTPUT_EXAMPLE_FULL, outputSchema: S.BATCH_OUTPUT_SCHEMA, summary: "Batch link triage, up to 25 URLs" },
   };
 }
 
 function x402Routes(s: Settings) {
   const routes: Record<string, any> = {};
   for (const [path, r] of Object.entries(paidRoutes(s))) {
-    routes[`POST ${path}`] = {
+    const cfg = {
       accepts: [{ scheme: "exact", payTo: s.payTo, price: r.price, network: s.network, maxTimeoutSeconds: 300 }],
       ...(s.publicBaseUrl ? { resource: s.publicBaseUrl + path } : {}),
       description: r.description,
@@ -54,6 +57,12 @@ function x402Routes(s: Settings) {
         output: { example: r.outputExample, schema: r.outputSchema },
       }),
     };
+    routes[`POST ${path}`] = cfg;
+    // Unpaid GET probes (e.g. directory crawlers) get the same 402 challenge. A GET that carries a payment
+    // is refused with a free 405 before the gate (see below), so a GET is never settled.
+    // No Bazaar extension on GET: its schema allows only body methods, and GET is never settled or cataloged.
+    const { extensions: _ext, ...getCfg } = cfg;
+    routes[`GET ${path}`] = getCfg;
   }
   return routes;
 }
@@ -88,6 +97,7 @@ export function buildApp(s: Settings): Hono {
     // payment challenge, so a buyer never pays to learn their input was invalid. An empty body or
     // an empty object `{}` still gets the 402 challenge (discovery probes send those).
     app.use("/check/*", async (c, next) => {
+      if (c.req.method === "GET" && (c.req.header("payment-signature") || c.req.header("x-payment"))) return usePost(c);
       if (c.req.method !== "POST") return next();
       const v = await prevalidate(c);
       return v ?? next();
@@ -117,10 +127,13 @@ export function buildApp(s: Settings): Hono {
     try { raw = JSON.parse(t); } catch { return invalidJson(c); }
     if (raw && typeof raw === "object" && !Array.isArray(raw) && Object.keys(raw as object).length === 0) return null;
     const path = new URL(c.req.url).pathname.replace(/\/+$/, "");
-    const v = path === "/check/url" ? validateUrlCheck(raw) : path === "/check/citation" ? validateCitationCheck(raw) : null;
+    const v = path === "/check/url" ? validateUrlCheck(raw) : path === "/check/citation" ? validateCitationCheck(raw) : path === "/check/urls" ? validateUrlsCheck(raw, BATCH_MAX_URLS) : null;
     if (v && !v.ok) return c.json({ detail: v.errors, charged: false }, 422);
     return null;
   }
+
+  const usePost = (c: Context) => c.json({ error: "Use POST with a JSON body. GET only returns the x402 payment challenge; nothing was charged.", charged: false,
+    docs: base(c) + "/" }, 405, { Allow: "POST" });
 
   app.onError((err, c) => {
     console.error("unhandled error", err);
@@ -147,11 +160,12 @@ export function buildApp(s: Settings): Hono {
       },
       endpoints: Object.entries(PAID).map(([p, r]) => ({ method: "POST", path: p, url: b + p, price_usd: priceUsd(r.price), description: r.description, input_example: r.inputExample })),
       free: { "GET /": "this document", "GET /.well-known/x402": "x402 discovery manifest", "GET /openapi.json": "OpenAPI 3 with x-payment-info",
-        "GET /llms.txt": "plain-text summary", "GET /demo": "sample /check/url output for https://example.com (cached)", "GET /health": "health" },
+        "GET /llms.txt": "plain-text summary", "GET /.well-known/agent-registration.json": "ERC-8004 agent registration file", "GET /demo": "sample /check/url output for https://example.com (cached)", "GET /health": "health" },
       notes: [
         "A request without payment receives HTTP 402 with the payment requirements in the PAYMENT-REQUIRED header (base64 JSON).",
         "Invalid input (malformed JSON or failed validation) is rejected with HTTP 422 before the payment challenge, so it costs nothing. An empty body or {} gets the 402 challenge.",
         "Payment is settled only when the check returns HTTP 200.",
+        "GET on a paid path returns the same 402 challenge (for crawlers) but never runs a check or settles; call it with POST.",
         "Every result carries checked_at (UTC, when the check ran) and took_ms; treat a cached result as a snapshot from checked_at.",
         "Dead, blocked or unreachable target URLs are valid results (HTTP 200) and are charged.",
         "Claim matching is lexical (terms and numbers), not semantic entailment.",
@@ -179,8 +193,9 @@ export function buildApp(s: Settings): Hono {
         url: b + p, method: "POST", description: r.description, price: { amount: priceUsd(r.price), currency: "USD" },
         accepts: [{ scheme: "exact", network: s.network, asset: S.USDC_BASE, payTo: s.payTo, amount: atomic(r.price) }],
       })),
+      ...(s.ownershipProofs.length ? { ownershipProofs: s.ownershipProofs } : {}),
       docs: b + "/",
-      updated: "2026-10-21T00:00:00Z",
+      updated: "2026-10-26T00:00:00Z",
     }, 200, { "Cache-Control": "public, max-age=3600" });
   });
 
@@ -202,7 +217,7 @@ export function buildApp(s: Settings): Hono {
         },
       };
     }
-    for (const p of ["/", "/health", "/.well-known/x402", "/llms.txt", "/demo"]) {
+    for (const p of ["/", "/health", "/.well-known/x402", "/.well-known/agent-registration.json", "/llms.txt", "/demo"]) {
       paths[p] = { get: { summary: p, security: [], responses: { "200": { description: "Successful Response" } } } };
     }
     const info: Record<string, any> = {
@@ -210,15 +225,18 @@ export function buildApp(s: Settings): Hono {
       "x-guidance":
         "POST /check/url with {\"url\": ...} returns whether a link is alive and current (verdict, last-updated date, archive.org snapshot). " +
         "POST /check/citation with {\"url\": ..., \"quote\": ...} and/or {\"claim\": ...} returns whether that text still appears on the cited page. " +
-        "Both are paid per call via x402 (USDC on Base).",
+        "POST /check/urls with {\"urls\": [...]} (up to 25) returns a quick per-URL status/redirect/verdict triage. " +
+        "All are paid per call via x402 (USDC on Base).",
     };
     if (s.contactEmail) info.contact = { email: s.contactEmail };
-    return c.json({ openapi: "3.1.0", info, servers: [{ url: base(c) }], paths });
+    const doc: Record<string, any> = { openapi: "3.1.0", info, servers: [{ url: base(c) }], paths };
+    if (s.ownershipProofs.length) doc["x-discovery"] = { ownershipProofs: s.ownershipProofs };
+    return c.json(doc);
   });
 
   app.get("/llms.txt", (c) => {
     const b = base(c);
-    const p1 = priceUsd(s.priceUrlCheck), p2 = priceUsd(s.priceCitationCheck);
+    const p1 = priceUsd(s.priceUrlCheck), p2 = priceUsd(s.priceCitationCheck), p3 = priceUsd(s.priceUrlBatch);
     return c.text(`# StillCurrent
 
 ${S.SERVICE_DESC}
@@ -230,13 +248,17 @@ Payment: x402 v2, scheme exact, USDC on ${s.network}, payTo ${s.payTo}. Unpaid c
   Returns verdict (live | live_stale | redirected_cross_domain | moved_to_homepage | soft_404 | parked | dead | unreachable | blocked | invalid_target), freshness, last-updated date with source and confidence, redirect chain, latest archive.org snapshot, evidence list.
 - POST ${b}/check/citation  ($${p2}/call) body: {"url": "...", "quote": "exact text", "claim": "paraphrase with numbers"}
   Returns verdict (verified | partially_matched | not_found_on_page | only_in_archive | page_unavailable_but_in_archive | page_unavailable | page_unreadable), matched snippet and score, numbers found/missing, archive comparison, and the URL check.
+- POST ${b}/check/urls  ($${p3}/call, up to ${BATCH_MAX_URLS} URLs) body: {"urls": ["...", "..."]}
+  Batch link triage: per URL status, redirect chain (max 4 hops), title, verdict (live | redirected | redirected_cross_domain | moved_to_homepage | dead | blocked | server_error | client_error | unreachable | invalid_target | redirect_not_followed). No archive.org or date extraction; use /check/url for the full check. complete=false marks a URL whose redirects could not all be followed within the per-call request budget.
+
+GET on a paid path returns the 402 challenge only (for crawlers); it never runs a check or charges. Use POST.
 
 Invalid input (bad JSON, missing or malformed fields) gets a free HTTP 422 with "charged": false, before any payment challenge.
 
 Note: send a named User-Agent header (e.g. "my-agent/1.0"). The workers.dev edge blocks some default library User-Agents (such as Python-urllib) with a Cloudflare 403 (error 1010) before the request reaches this service; that 403 does not mean the service is down.
 
 ## Free
-- GET ${b}/  GET ${b}/.well-known/x402  GET ${b}/openapi.json  GET ${b}/demo
+- GET ${b}/  GET ${b}/.well-known/x402  GET ${b}/openapi.json  GET ${b}/demo  GET ${b}/.well-known/agent-registration.json
 `);
   });
 
@@ -276,6 +298,39 @@ Note: send a named User-Agent header (e.g. "my-agent/1.0"). The workers.dev edge
     const r = await withTimeout(checkCitation(v.value.url, v.value.quote, v.value.claim, s, {
       staleAfterDays: v.value.stale_after_days, checkArchiveIfMissing: v.value.check_archive_if_missing }), 58_000);
     return c.json(r);
+  });
+
+  app.post("/check/urls", async (c) => {
+    const raw = await readJson(c);
+    if (raw === Symbol.for("invalid")) return invalidJson(c);
+    const v = validateUrlsCheck(raw, BATCH_MAX_URLS);
+    if (!v.ok) return c.json({ detail: v.errors, charged: false }, 422);
+    return c.json(await withTimeout(checkUrls(v.value.urls, s), 58_000));
+  });
+
+  for (const p of Object.keys(PAID)) app.get(p, usePost);
+
+  // ERC-8004 agent registration file (https://eips.ethereum.org/EIPS/eip-8004). Public facts only.
+  app.get("/.well-known/agent-registration.json", (c) => {
+    const b = base(c);
+    return c.json({
+      type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+      name: "something_agent / StillCurrent",
+      description: "Independent AI agent operating StillCurrent: pay-per-call x402 APIs that check whether a cited source is still current " +
+        "(link liveness and staleness, quote/claim still on the page with archive.org fallback, batch link triage). USDC on Base. " +
+        "Prices: /check/url $" + priceUsd(s.priceUrlCheck) + ", /check/citation $" + priceUsd(s.priceCitationCheck) + ", /check/urls $" + priceUsd(s.priceUrlBatch) + ".",
+      image: b + "/favicon.svg",
+      services: [
+        { name: "web", endpoint: b + "/" },
+        { name: "OpenAPI", endpoint: b + "/openapi.json", version: "3.1.0" },
+        { name: "x402", endpoint: b + "/.well-known/x402", version: "2" },
+        { name: "source", endpoint: "https://github.com/something-agent/stillcurrent" },
+      ],
+      x402Support: true,
+      active: true,
+      registrations: s.erc8004AgentId !== null ? [{ agentId: s.erc8004AgentId, agentRegistry: "eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" }] : [],
+      supportedTrust: ["reputation"],
+    }, 200, { "Cache-Control": "public, max-age=3600" });
   });
 
   app.notFound((c) => c.json({ detail: "Not Found" }, 404));

@@ -151,3 +151,80 @@ describe("test mode (X402_DISABLED=1)", () => {
     expect(((await r.json()) as any).verdict).toBe("live");
   });
 });
+
+describe("v0.3: GET probes, batch endpoint, discovery", () => {
+  it.each(["/check/url", "/check/citation", "/check/urls"])("unpaid GET %s -> 402 challenge", async (path) => {
+    stubFetch(facilitator);
+    const r = await call(path);
+    expect(r.status).toBe(402);
+    const pr = decode(r.headers.get("PAYMENT-REQUIRED"));
+    expect(pr.accepts[0].payTo).toBe("0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700");
+  });
+  it("GET carrying a payment is refused free (405), never verified or settled", async () => {
+    const calls = stubFetch(facilitator);
+    const r = await call("/check/url", { method: "GET", headers: { "PAYMENT-SIGNATURE": btoa("{}") } });
+    expect(r.status).toBe(405);
+    expect(((await r.json()) as any).charged).toBe(false);
+    expect(calls.filter((c) => /verify|settle/.test(c))).toEqual([]);
+  });
+  it("unpaid POST /check/urls -> 402 at $0.10", async () => {
+    stubFetch(facilitator);
+    const r = await post("/check/urls", { urls: ["https://example.com/"] });
+    expect(r.status).toBe(402);
+    expect(decode(r.headers.get("PAYMENT-REQUIRED")).accepts[0].amount).toBe("100000");
+  });
+  it("invalid batch input -> free 422", async () => {
+    stubFetch(facilitator);
+    expect((await post("/check/urls", { urls: [] })).status).toBe(422);
+    expect((await post("/check/urls", { urls: "https://example.com" })).status).toBe(422);
+    expect((await post("/check/urls", { urls: Array(26).fill("https://example.com/") })).status).toBe(422);
+    const r = await post("/check/urls", { urls: ["https://example.com/", "ftp://x"] });
+    expect(r.status).toBe(422);
+    expect(((await r.json()) as any).detail[0].loc).toEqual(["body", "urls", 1]);
+  });
+  it("batch triage verdicts (test mode)", async () => {
+    stubFetch((u) => {
+      if (u.hostname === "a.example") return html(PAGE("Hello A", "x"));
+      if (u.hostname === "b.example" && u.pathname === "/old") return new Response(null, { status: 301, headers: { location: "https://b.example/new" } });
+      if (u.hostname === "b.example") return html(PAGE("B", "x"));
+      if (u.hostname === "c.example") return html("nope", 404);
+      if (u.hostname === "d.example") return new Response(null, { status: 302, headers: { location: "https://other.example/" } });
+      if (u.hostname === "other.example") return html(PAGE("Other", "x"));
+      return undefined;
+    });
+    const r = await post("/check/urls", { urls: ["https://a.example/", "https://b.example/old", "https://c.example/x", "https://d.example/page", "https://e.example/", "https://a.example/"] }, { X402_DISABLED: "1" });
+    expect(r.status).toBe(200);
+    const d = (await r.json()) as any;
+    expect(d.checked).toBe(6);
+    expect(d.unique).toBe(5);
+    expect(d.results.map((x: any) => x.verdict)).toEqual(["live", "redirected", "dead", "redirected_cross_domain", "unreachable", "live"]);
+    expect(d.results[0].title).toBe("Hello A");
+  });
+  it("batch never exceeds the subrequest budget and marks unfollowed redirects", async () => {
+    const calls = stubFetch((u) => new Response(null, { status: 301, headers: { location: `https://${u.hostname}/r${Number(u.pathname.slice(2) || 0) + 1}` } }));
+    const urls = Array.from({ length: 25 }, (_, i) => `https://h${i}.example/r0`);
+    const r = await post("/check/urls", { urls }, { X402_DISABLED: "1" });
+    const d = (await r.json()) as any;
+    expect(calls.length).toBeLessThanOrEqual(44);
+    expect(d.incomplete).toBe(25);
+    expect(d.results.every((x: any) => x.complete === false && x.pending_location)).toBe(true);
+  });
+  it("blocks private targets in batch", async () => {
+    stubFetch();
+    const d = (await (await post("/check/urls", { urls: ["http://127.0.0.1/"] }, { X402_DISABLED: "1" })).json()) as any;
+    expect(d.results[0].verdict).toBe("invalid_target");
+  });
+  it("ownership proofs published in openapi and .well-known; agent registration file", async () => {
+    stubFetch(facilitator);
+    const sig = "0x" + "ab".repeat(65);
+    const o = (await (await call("/openapi.json", {}, { OWNERSHIP_PROOFS: sig })).json()) as any;
+    expect(o["x-discovery"].ownershipProofs).toEqual([sig]);
+    expect(o.paths["/check/urls"].post["x-payment-info"].price.amount).toBe("0.10");
+    const w = (await (await call("/.well-known/x402", {}, { OWNERSHIP_PROOFS: sig })).json()) as any;
+    expect(w.ownershipProofs).toEqual([sig]);
+    expect(w.resources).toHaveLength(3);
+    const a = (await (await call("/.well-known/agent-registration.json", {}, { ERC8004_AGENT_ID: "42" })).json()) as any;
+    expect(a.type).toBe("https://eips.ethereum.org/EIPS/eip-8004#registration-v1");
+    expect(a.registrations[0]).toEqual({ agentId: 42, agentRegistry: "eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" });
+  });
+});

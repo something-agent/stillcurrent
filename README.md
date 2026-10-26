@@ -14,6 +14,7 @@ The service never holds a private key, never signs, never sends funds. It only a
 |---|---|---|
 | `POST /check/url` | $0.01 | Is this link alive and current? Status and redirect chain; soft-404, parked-domain, redirect-to-homepage, WAF/bot-wall and cross-domain-redirect detection; last-updated date (meta/JSON-LD/`<time>`/visible "Last updated/reviewed" text/PDF metadata/Last-Modified) with source and confidence; latest archive.org snapshot (any status and latest HTTP-200); verdict, evidence, and a recommended action. |
 | `POST /check/citation` | $0.02 | Does the quoted text or claim still appear on the cited page (HTML, PDF, text)? Quote matching runs exact, then punctuation/case-insensitive, then fuzzy (score, snippet, matched text). Claims are checked lexically: key terms plus **every number** must appear, and the best passage is returned. If the text is not on the live page, it is compared against the latest archive.org snapshot (`only_in_archive` = the source changed). The response also includes the full URL check. |
+| `POST /check/urls` | $0.10 | Batch link triage for up to 25 URLs: status, redirect chain (max 4 hops), page title and a verdict per URL (`live`, `redirected`, `redirected_cross_domain`, `moved_to_homepage`, `dead`, `blocked`, `server_error`, `unreachable`, ...). Lighter than `/check/url` (no archive.org lookup or dates) so it fits the Workers free-plan request budget; `complete: false` marks a URL whose redirects could not all be followed. |
 
 Site adapters: **Wikipedia** goes through the official MediaWiki APIs and returns the last revision timestamp and a permanent `oldid` link. **legislation.gov.uk** returns factual editorial metadata: revised-text date and the count/types of outstanding unapplied effects. This is *not* a legal in-force verdict. A general law-in-force endpoint was left out on purpose because it could not be made reliable without per-provision parsing.
 
@@ -27,7 +28,7 @@ Free routes: `GET /` (service JSON), `GET /.well-known/x402` (x402scan v1 fan-ou
   crawlers probing with empty bodies get 402, not 422.
 * Settlement happens only when the handler returns < 400. Invalid input (422) is not charged. A dead, blocked, or unreachable *target*
   is still a successful check (200) and is charged.
-* Amounts: `/check/url` = `10000`, `/check/citation` = `20000` (USDC atomic units, 6 dp). Asset `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`.
+* Amounts: `/check/url` = `10000`, `/check/citation` = `20000`, `/check/urls` = `100000` (USDC atomic units, 6 dp). Asset `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`.
 * PayAI fee: the facilitator charges the *seller* in credits. Base `exact` is about 2.09 credits ($0.0021) per settlement (live rate
   `GET https://facilitator.payai.network/pricing`). The 1,000 free credits per payTo therefore cover about 480 Base settlements, not 1,000.
   After that the operator prepays ($1 = 1,000 credits) and sets `PAYAI_API_KEY_ID/SECRET`. Check
@@ -89,3 +90,9 @@ free instances sleep after 15 min idle (~1 min cold start).
 
 ## License
 MIT
+
+## Discovery and identity (v0.3.0)
+
+* `GET` on a paid path returns the same 402 challenge for crawlers, but never runs a check or settles (a GET carrying a payment gets a free 405).
+* x402scan ownership proof: EIP-191 signature of the origin `https://stillcurrent.something-agent.workers.dev` by the payTo address, published in `/openapi.json` (`x-discovery.ownershipProofs`) and `/.well-known/x402`.
+* ERC-8004: agentId `1135140` in the IdentityRegistry on Base (`eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`); registration file at `/.well-known/agent-registration.json`.

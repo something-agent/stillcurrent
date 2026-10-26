@@ -5,6 +5,9 @@ export interface Env {
   FACILITATOR_URL?: string;
   PRICE_URL_CHECK?: string;
   PRICE_CITATION_CHECK?: string;
+  PRICE_URL_BATCH?: string;
+  OWNERSHIP_PROOFS?: string;
+  ERC8004_AGENT_ID?: string;
   PUBLIC_BASE_URL?: string;
   X402_DISABLED?: string;
   DEMO_ENABLED?: string;
@@ -20,6 +23,9 @@ export interface Settings {
   facilitatorUrl: string;
   priceUrlCheck: string;
   priceCitationCheck: string;
+  priceUrlBatch: string;
+  ownershipProofs: string[];
+  erc8004AgentId: number | null;
   publicBaseUrl: string | null;
   paymentsDisabled: boolean;
   allowPrivateTargets: boolean;
@@ -50,6 +56,9 @@ export function loadSettings(env: Env = {}): Settings {
     facilitatorUrl: env.FACILITATOR_URL || "https://facilitator.payai.network",
     priceUrlCheck: env.PRICE_URL_CHECK || "$0.01",
     priceCitationCheck: env.PRICE_CITATION_CHECK || "$0.02",
+    priceUrlBatch: env.PRICE_URL_BATCH || "$0.10",
+    ownershipProofs: (env.OWNERSHIP_PROOFS || "").split(",").map((x) => x.trim()).filter((x) => /^0x[0-9a-fA-F]{130}$/.test(x)),
+    erc8004AgentId: env.ERC8004_AGENT_ID && /^\d+$/.test(env.ERC8004_AGENT_ID.trim()) ? Number(env.ERC8004_AGENT_ID.trim()) : null,
     publicBaseUrl,
     paymentsDisabled: bool(env.X402_DISABLED, false),
     allowPrivateTargets: bool(env.ALLOW_PRIVATE_TARGETS, false),

@@ -187,7 +187,7 @@ async function readCapped(resp: Response, maxBytes: number): Promise<{ body: Uin
   return { body: out, truncated };
 }
 
-function classifyError(e: unknown): { code: string; detail: string } {
+export function classifyError(e: unknown): { code: string; detail: string } {
   const name = (e as any)?.name || "Error";
   const msg = String((e as any)?.message || e).slice(0, 300);
   if (name === "TimeoutError" || name === "AbortError" || /timed? ?out/i.test(msg)) return { code: "timeout", detail: name };
