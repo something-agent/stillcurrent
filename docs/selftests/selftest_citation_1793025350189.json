@@ -1,0 +1,703 @@
+{
+  "label": "SELF-TEST: operating wallet paying its own StillCurrent service (payer == payTo). Not revenue.",
+  "started": "2026-10-26T14:35:48.621Z",
+  "exchanges": [
+    {
+      "at": "2026-10-26T14:35:48.867Z",
+      "request": {
+        "method": "POST",
+        "url": "https://stillcurrent.something-agent.workers.dev/check/citation",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "something-agent-selftest/1.0"
+        },
+        "body": {
+          "url": "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+          "quote": "SwapRouter02",
+          "claim": "Uniswap v3 is deployed on Base"
+        }
+      },
+      "response": {
+        "status": 402,
+        "headers": {
+          "access-control-allow-origin": "*",
+          "access-control-expose-headers": "PAYMENT-REQUIRED,PAYMENT-RESPONSE,X-PAYMENT-RESPONSE,EXTENSION-RESPONSES",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "no-store",
+          "cf-ray": "a50a308dbfeb3e81-IAD",
+          "connection": "keep-alive",
+          "content-length": "512",
+          "content-type": "application/json",
+          "date": "Mon, 26 Oct 2026 14:35:48 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9zdGlsbGN1cnJlbnQuc29tZXRoaW5nLWFnZW50LndvcmtlcnMuZGV2L2NoZWNrL2NpdGF0aW9uIiwiZGVzY3JpcHRpb24iOiJDaGVja3Mgd2hldGhlciBhIHF1b3RlZCBzZW50ZW5jZSBvciBhIGNsYWltIHN0aWxsIGFwcGVhcnMgb24gdGhlIGNpdGVkIHBhZ2UgKEhUTUwsIFBERiBvciB0ZXh0KS4gRXhhY3QsIHB1bmN0dWF0aW9uLWluc2Vuc2l0aXZlIGFuZCBmdXp6eSBxdW90ZSBtYXRjaGluZyB3aXRoIHNuaXBwZXQ7IGxleGljYWwgY2xhaW0gY2hlY2sgaW5jbC4gZXZlcnkgbnVtYmVyOyBjb21wYXJlcyB3aXRoIHRoZSBsYXRlc3QgYXJjaGl2ZS5vcmcgc25hcHNob3Qgd2hlbiBtaXNzaW5nOyBpbmNsdWRlcyB0aGUgZnVsbCBVUkwgbGl2ZW5lc3Mvc3RhbGVuZXNzIGNoZWNrLiIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiIsInNlcnZpY2VOYW1lIjoiU3RpbGxDdXJyZW50IiwidGFncyI6WyJjaXRhdGlvbnMiLCJsaW5rLWNoZWNraW5nIiwiZmFjdC1jaGVja2luZyIsImZyZXNobmVzcyIsInJlc2VhcmNoIl19LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFtb3VudCI6IjIwMDAwIiwiYXNzZXQiOiIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMiLCJwYXlUbyI6IjB4MzMxOTBjOUQyNjYyRjk0QTE5Q0U4OEVBNjY2ZjBmZjhDZURlMzcwMCIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19XSwiZXh0ZW5zaW9ucyI6eyJiYXphYXIiOnsiaW5mbyI6eyJpbnB1dCI6eyJ0eXBlIjoiaHR0cCIsImJvZHlUeXBlIjoianNvbiIsImJvZHkiOnsidXJsIjoiaHR0cHM6Ly93d3cuY2RjLmdvdi9uY2hzL2Zhc3RhdHMvbGlmZS1leHBlY3RhbmN5Lmh0bSIsImNsYWltIjoiTGlmZSBleHBlY3RhbmN5IGF0IGJpcnRoIGluIHRoZSBVUyB3YXMgNzguNCB5ZWFycyJ9LCJtZXRob2QiOiJQT1NUIn0sIm91dHB1dCI6eyJ0eXBlIjoianNvbiIsImV4YW1wbGUiOnsidmVyZGljdCI6InBhcnRpYWxseV9tYXRjaGVkIiwiY2xhaW1fbWF0Y2giOnsidmVyZGljdCI6InBhcnRpYWxseV9zdXBwb3J0ZWRfbGV4aWNhbGx5IiwibnVtYmVyc19mb3VuZF9vbl9wYWdlIjpbXSwibnVtYmVyc19taXNzaW5nX2Zyb21fcGFnZSI6WyI3OC40Il19LCJjaGVja2VkX2F0IjoiMjAyNi0xMC0yMlQxODowMDowMFoiLCJ0b29rX21zIjo2NTV9fX0sInNjaGVtYSI6eyIkc2NoZW1hIjoiaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWEiLCJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJpbnB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmciLCJjb25zdCI6Imh0dHAifSwibWV0aG9kIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbIlBPU1QiXX0sImJvZHlUeXBlIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbImpzb24iLCJmb3JtLWRhdGEiLCJ0ZXh0Il19LCJib2R5Ijp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InVybCI6eyJ0eXBlIjoic3RyaW5nIiwibWF4TGVuZ3RoIjoyMDQ4LCJkZXNjcmlwdGlvbiI6IkFic29sdXRlIGh0dHAocykgVVJMIG9mIHRoZSBjaXRlZCBwYWdlIChIVE1MLCBQREYgb3IgcGxhaW4gdGV4dCkuIiwidGl0bGUiOiJVcmwifSwicXVvdGUiOnsiYW55T2YiOlt7InR5cGUiOiJzdHJpbmciLCJtYXhMZW5ndGgiOjIwMDB9LHsidHlwZSI6Im51bGwifV0sImRlZmF1bHQiOm51bGwsImRlc2NyaXB0aW9uIjoiRXhhY3QgdGV4dCB0aGUgY2l0YXRpb24gcXVvdGVzLiBNYXRjaGVkIGV4YWN0bHksIHRoZW4gcHVuY3R1YXRpb24taW5zZW5zaXRpdmUsIHRoZW4gZnV6enkuIiwidGl0bGUiOiJRdW90ZSJ9LCJjbGFpbSI6eyJhbnlPZiI6W3sidHlwZSI6InN0cmluZyIsIm1heExlbmd0aCI6MTAwMH0seyJ0eXBlIjoibnVsbCJ9XSwiZGVmYXVsdCI6bnVsbCwiZGVzY3JpcHRpb24iOiJQYXJhcGhyYXNlZCBjbGFpbSBhdHRyaWJ1dGVkIHRvIHRoZSBzb3VyY2UuIENoZWNrZWQgbGV4aWNhbGx5OiBrZXkgdGVybXMgYW5kIGV2ZXJ5IG51bWJlciBtdXN0IGFwcGVhciBuZWFyIGVhY2ggb3RoZXIuIiwidGl0bGUiOiJDbGFpbSJ9LCJzdGFsZV9hZnRlcl9kYXlzIjp7InR5cGUiOiJpbnRlZ2VyIiwibWluaW11bSI6MSwibWF4aW11bSI6MzY1MDAsImRlZmF1bHQiOjM2NSwidGl0bGUiOiJTdGFsZSBBZnRlciBEYXlzIn0sImNoZWNrX2FyY2hpdmVfaWZfbWlzc2luZyI6eyJ0eXBlIjoiYm9vbGVhbiIsImRlZmF1bHQiOnRydWUsImRlc2NyaXB0aW9uIjoiSWYgbm90IGZvdW5kIG9uIHRoZSBsaXZlIHBhZ2UsIGFsc28gc2VhcmNoIHRoZSBsYXRlc3QgYXJjaGl2ZS5vcmcgc25hcHNob3QuIiwidGl0bGUiOiJDaGVjayBBcmNoaXZlIElmIE1pc3NpbmcifX0sInJlcXVpcmVkIjpbInVybCJdfX0sInJlcXVpcmVkIjpbInR5cGUiLCJtZXRob2QiLCJib2R5VHlwZSIsImJvZHkiXSwiYWRkaXRpb25hbFByb3BlcnRpZXMiOmZhbHNlfSwib3V0cHV0Ijp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InR5cGUiOnsidHlwZSI6InN0cmluZyJ9LCJleGFtcGxlIjp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InZlcmRpY3QiOnsidHlwZSI6InN0cmluZyIsImVudW0iOlsidmVyaWZpZWQiLCJwYXJ0aWFsbHlfbWF0Y2hlZCIsIm5vdF9mb3VuZF9vbl9wYWdlIiwib25seV9pbl9hcmNoaXZlIiwicGFnZV91bmF2YWlsYWJsZV9idXRfaW5fYXJjaGl2ZSIsInBhZ2VfdW5hdmFpbGFibGUiLCJwYWdlX3VucmVhZGFibGUiXX0sImV2aWRlbmNlX2tpbmQiOnsidHlwZSI6WyJzdHJpbmciLCJudWxsIl0sImVudW0iOlsicXVvdGVfdGV4dF9tYXRjaCIsImxleGljYWxfY2xhaW1fbWF0Y2giLCJxdW90ZV90ZXh0X21hdGNoX2FyY2hpdmUiLCJsZXhpY2FsX2NsYWltX21hdGNoX2FyY2hpdmUiLCJwYXJ0aWFsX2xleGljYWxfbWF0Y2giLG51bGxdLCJkZXNjcmlwdGlvbiI6IldoYXQgYmFja3MgdGhlIHZlcmRpY3QuIGxleGljYWxfY2xhaW1fbWF0Y2ggbWVhbnMgdGhlIGNsYWltJ3MgdGVybXMgYW5kIG51bWJlcnMgY28tb2NjdXIgb24gdGhlIHBhZ2U7IGl0IGlzIE5PVCBzZW1hbnRpYyBzdXBwb3J0IChhbiBlbnRpdHktbnVtYmVyIHN3YXAgY2FuIHN0aWxsIG1hdGNoKS4gVHJlYXQgaXQgYXMgcmV0cmlldmFsLCBub3QgcHJvb2YuIn0sImV4cGxhbmF0aW9uIjp7InR5cGUiOiJzdHJpbmcifSwicXVvdGVfbWF0Y2giOnsidHlwZSI6WyJvYmplY3QiLCJudWxsIl19LCJjbGFpbV9tYXRjaCI6eyJ0eXBlIjpbIm9iamVjdCIsIm51bGwiXX0sImFyY2hpdmVfY29tcGFyaXNvbiI6eyJ0eXBlIjpbIm9iamVjdCIsIm51bGwiXX0sInVybF9jaGVjayI6eyJ0eXBlIjoib2JqZWN0In0sImNoZWNrZWRfYXQiOnsidHlwZSI6InN0cmluZyIsImZvcm1hdCI6ImRhdGUtdGltZSIsImRlc2NyaXB0aW9uIjoiVVRDIHRpbWUgdGhlIGNoZWNrIHJhbi4gQSBjYWNoZWQgcmVzdWx0IGlzIGEgc25hcHNob3QgZnJvbSB0aGlzIHRpbWUuIn0sInRvb2tfbXMiOnsidHlwZSI6ImludGVnZXIifX0sInJlcXVpcmVkIjpbInZlcmRpY3QiLCJjaGVja2VkX2F0Il19fSwicmVxdWlyZWQiOlsidHlwZSJdfX0sInJlcXVpcmVkIjpbImlucHV0Il19fX19",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=y1Suzm6LCsPmkiJRNWg3prZvOnQz2hYcE7yiNO6%2B77%2BLpHFN3cmLy3wfT1kPGz7TDEpgm0R4bI6Pag85TzBGZyDPv0AwPhISxmgGivBo9BOk26wG5giyvvLEtbsB%2F1xirBtwPnRW5pvq6G3Jxws%2FdsipVlHV21FaHN6nWc4UWUNJwb3wotC2\"}]}",
+          "server": "cloudflare"
+        },
+        "body": {
+          "x402Version": 2,
+          "error": "Payment required",
+          "message": "StillCurrent /check/citation costs $0.02 in USDC on eip155:8453. Payment requirements are in the PAYMENT-REQUIRED response header (base64-encoded JSON).",
+          "accepts": [
+            {
+              "scheme": "exact",
+              "network": "eip155:8453",
+              "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "amount": "20000",
+              "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "maxTimeoutSeconds": 300,
+              "extra": {
+                "name": "USD Coin",
+                "version": "2"
+              }
+            }
+          ],
+          "docs": "https://stillcurrent.something-agent.workers.dev/"
+        }
+      },
+      "decoded_headers": {
+        "response.payment-required": {
+          "x402Version": 2,
+          "error": "Payment required",
+          "resource": {
+            "url": "https://stillcurrent.something-agent.workers.dev/check/citation",
+            "description": "Checks whether a quoted sentence or a claim still appears on the cited page (HTML, PDF or text). Exact, punctuation-insensitive and fuzzy quote matching with snippet; lexical claim check incl. every number; compares with the latest archive.org snapshot when missing; includes the full URL liveness/staleness check.",
+            "mimeType": "application/json",
+            "serviceName": "StillCurrent",
+            "tags": [
+              "citations",
+              "link-checking",
+              "fact-checking",
+              "freshness",
+              "research"
+            ]
+          },
+          "accepts": [
+            {
+              "scheme": "exact",
+              "network": "eip155:8453",
+              "amount": "20000",
+              "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "maxTimeoutSeconds": 300,
+              "extra": {
+                "name": "USD Coin",
+                "version": "2"
+              }
+            }
+          ],
+          "extensions": {
+            "bazaar": {
+              "info": {
+                "input": {
+                  "type": "http",
+                  "bodyType": "json",
+                  "body": {
+                    "url": "https://www.cdc.gov/nchs/fastats/life-expectancy.htm",
+                    "claim": "Life expectancy at birth in the US was 78.4 years"
+                  },
+                  "method": "POST"
+                },
+                "output": {
+                  "type": "json",
+                  "example": {
+                    "verdict": "partially_matched",
+                    "claim_match": {
+                      "verdict": "partially_supported_lexically",
+                      "numbers_found_on_page": [],
+                      "numbers_missing_from_page": [
+                        "78.4"
+                      ]
+                    },
+                    "checked_at": "2026-10-22T18:00:00Z",
+                    "took_ms": 655
+                  }
+                }
+              },
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "http"
+                      },
+                      "method": {
+                        "type": "string",
+                        "enum": [
+                          "POST"
+                        ]
+                      },
+                      "bodyType": {
+                        "type": "string",
+                        "enum": [
+                          "json",
+                          "form-data",
+                          "text"
+                        ]
+                      },
+                      "body": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "maxLength": 2048,
+                            "description": "Absolute http(s) URL of the cited page (HTML, PDF or plain text).",
+                            "title": "Url"
+                          },
+                          "quote": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 2000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Exact text the citation quotes. Matched exactly, then punctuation-insensitive, then fuzzy.",
+                            "title": "Quote"
+                          },
+                          "claim": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 1000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Paraphrased claim attributed to the source. Checked lexically: key terms and every number must appear near each other.",
+                            "title": "Claim"
+                          },
+                          "stale_after_days": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 36500,
+                            "default": 365,
+                            "title": "Stale After Days"
+                          },
+                          "check_archive_if_missing": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "If not found on the live page, also search the latest archive.org snapshot.",
+                            "title": "Check Archive If Missing"
+                          }
+                        },
+                        "required": [
+                          "url"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "method",
+                      "bodyType",
+                      "body"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "output": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "type": "object",
+                        "properties": {
+                          "verdict": {
+                            "type": "string",
+                            "enum": [
+                              "verified",
+                              "partially_matched",
+                              "not_found_on_page",
+                              "only_in_archive",
+                              "page_unavailable_but_in_archive",
+                              "page_unavailable",
+                              "page_unreadable"
+                            ]
+                          },
+                          "evidence_kind": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "quote_text_match",
+                              "lexical_claim_match",
+                              "quote_text_match_archive",
+                              "lexical_claim_match_archive",
+                              "partial_lexical_match",
+                              null
+                            ],
+                            "description": "What backs the verdict. lexical_claim_match means the claim's terms and numbers co-occur on the page; it is NOT semantic support (an entity-number swap can still match). Treat it as retrieval, not proof."
+                          },
+                          "explanation": {
+                            "type": "string"
+                          },
+                          "quote_match": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "claim_match": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "archive_comparison": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "url_check": {
+                            "type": "object"
+                          },
+                          "checked_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "UTC time the check ran. A cached result is a snapshot from this time."
+                          },
+                          "took_ms": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "verdict",
+                          "checked_at"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                },
+                "required": [
+                  "input"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-26T14:35:50.188Z",
+      "request": {
+        "method": "POST",
+        "url": "https://stillcurrent.something-agent.workers.dev/check/citation",
+        "headers": {
+          "access-control-expose-headers": "PAYMENT-RESPONSE,X-PAYMENT-RESPONSE",
+          "content-type": "application/json",
+          "payment-signature": "eyJ4NDAyVmVyc2lvbiI6MiwicGF5bG9hZCI6eyJhdXRob3JpemF0aW9uIjp7ImZyb20iOiIweDMzMTkwYzlEMjY2MkY5NEExOUNFODhFQTY2NmYwZmY4Q2VEZTM3MDAiLCJ0byI6IjB4MzMxOTBjOUQyNjYyRjk0QTE5Q0U4OEVBNjY2ZjBmZjhDZURlMzcwMCIsInZhbHVlIjoiMjAwMDAiLCJ2YWxpZEFmdGVyIjoiMCIsInZhbGlkQmVmb3JlIjoiMTc5MzAyNTY0OCIsIm5vbmNlIjoiMHg5ZjgwNzAyZTAxMjE0NjE4NTNlZmIwMTU3YWU4ZWFjMmQ5YjJjZDgzMTA4YmU4ODg4YTA5Y2NmY2Q0ZTIyYTgyIn0sInNpZ25hdHVyZSI6IjB4NDQ0MGJlZGYyZmJhMWI1M2E3MjdmNWIxOGFkMGFkNjRhOTVmYTczZTcyN2RiYmFlMDMzOWU2ZmYxZTAwYWI5NDU1ZDNmYjk1NDBmOTBiMDU5ZjNjMzAwYjE2OTA2NjU4NTk1ZjRiMWNiNzQ0M2I3M2U4MDRjYjNmY2JkZWRjNGMxYyJ9LCJleHRlbnNpb25zIjp7ImJhemFhciI6eyJpbmZvIjp7ImlucHV0Ijp7InR5cGUiOiJodHRwIiwiYm9keVR5cGUiOiJqc29uIiwiYm9keSI6eyJ1cmwiOiJodHRwczovL3d3dy5jZGMuZ292L25jaHMvZmFzdGF0cy9saWZlLWV4cGVjdGFuY3kuaHRtIiwiY2xhaW0iOiJMaWZlIGV4cGVjdGFuY3kgYXQgYmlydGggaW4gdGhlIFVTIHdhcyA3OC40IHllYXJzIn0sIm1ldGhvZCI6IlBPU1QifSwib3V0cHV0Ijp7InR5cGUiOiJqc29uIiwiZXhhbXBsZSI6eyJ2ZXJkaWN0IjoicGFydGlhbGx5X21hdGNoZWQiLCJjbGFpbV9tYXRjaCI6eyJ2ZXJkaWN0IjoicGFydGlhbGx5X3N1cHBvcnRlZF9sZXhpY2FsbHkiLCJudW1iZXJzX2ZvdW5kX29uX3BhZ2UiOltdLCJudW1iZXJzX21pc3NpbmdfZnJvbV9wYWdlIjpbIjc4LjQiXX0sImNoZWNrZWRfYXQiOiIyMDI2LTEwLTIyVDE4OjAwOjAwWiIsInRvb2tfbXMiOjY1NX19fSwic2NoZW1hIjp7IiRzY2hlbWEiOiJodHRwczovL2pzb24tc2NoZW1hLm9yZy9kcmFmdC8yMDIwLTEyL3NjaGVtYSIsInR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7ImlucHV0Ijp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InR5cGUiOnsidHlwZSI6InN0cmluZyIsImNvbnN0IjoiaHR0cCJ9LCJtZXRob2QiOnsidHlwZSI6InN0cmluZyIsImVudW0iOlsiUE9TVCJdfSwiYm9keVR5cGUiOnsidHlwZSI6InN0cmluZyIsImVudW0iOlsianNvbiIsImZvcm0tZGF0YSIsInRleHQiXX0sImJvZHkiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidXJsIjp7InR5cGUiOiJzdHJpbmciLCJtYXhMZW5ndGgiOjIwNDgsImRlc2NyaXB0aW9uIjoiQWJzb2x1dGUgaHR0cChzKSBVUkwgb2YgdGhlIGNpdGVkIHBhZ2UgKEhUTUwsIFBERiBvciBwbGFpbiB0ZXh0KS4iLCJ0aXRsZSI6IlVybCJ9LCJxdW90ZSI6eyJhbnlPZiI6W3sidHlwZSI6InN0cmluZyIsIm1heExlbmd0aCI6MjAwMH0seyJ0eXBlIjoibnVsbCJ9XSwiZGVmYXVsdCI6bnVsbCwiZGVzY3JpcHRpb24iOiJFeGFjdCB0ZXh0IHRoZSBjaXRhdGlvbiBxdW90ZXMuIE1hdGNoZWQgZXhhY3RseSwgdGhlbiBwdW5jdHVhdGlvbi1pbnNlbnNpdGl2ZSwgdGhlbiBmdXp6eS4iLCJ0aXRsZSI6IlF1b3RlIn0sImNsYWltIjp7ImFueU9mIjpbeyJ0eXBlIjoic3RyaW5nIiwibWF4TGVuZ3RoIjoxMDAwfSx7InR5cGUiOiJudWxsIn1dLCJkZWZhdWx0IjpudWxsLCJkZXNjcmlwdGlvbiI6IlBhcmFwaHJhc2VkIGNsYWltIGF0dHJpYnV0ZWQgdG8gdGhlIHNvdXJjZS4gQ2hlY2tlZCBsZXhpY2FsbHk6IGtleSB0ZXJtcyBhbmQgZXZlcnkgbnVtYmVyIG11c3QgYXBwZWFyIG5lYXIgZWFjaCBvdGhlci4iLCJ0aXRsZSI6IkNsYWltIn0sInN0YWxlX2FmdGVyX2RheXMiOnsidHlwZSI6ImludGVnZXIiLCJtaW5pbXVtIjoxLCJtYXhpbXVtIjozNjUwMCwiZGVmYXVsdCI6MzY1LCJ0aXRsZSI6IlN0YWxlIEFmdGVyIERheXMifSwiY2hlY2tfYXJjaGl2ZV9pZl9taXNzaW5nIjp7InR5cGUiOiJib29sZWFuIiwiZGVmYXVsdCI6dHJ1ZSwiZGVzY3JpcHRpb24iOiJJZiBub3QgZm91bmQgb24gdGhlIGxpdmUgcGFnZSwgYWxzbyBzZWFyY2ggdGhlIGxhdGVzdCBhcmNoaXZlLm9yZyBzbmFwc2hvdC4iLCJ0aXRsZSI6IkNoZWNrIEFyY2hpdmUgSWYgTWlzc2luZyJ9fSwicmVxdWlyZWQiOlsidXJsIl19fSwicmVxdWlyZWQiOlsidHlwZSIsIm1ldGhvZCIsImJvZHlUeXBlIiwiYm9keSJdLCJhZGRpdGlvbmFsUHJvcGVydGllcyI6ZmFsc2V9LCJvdXRwdXQiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidHlwZSI6eyJ0eXBlIjoic3RyaW5nIn0sImV4YW1wbGUiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidmVyZGljdCI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJ2ZXJpZmllZCIsInBhcnRpYWxseV9tYXRjaGVkIiwibm90X2ZvdW5kX29uX3BhZ2UiLCJvbmx5X2luX2FyY2hpdmUiLCJwYWdlX3VuYXZhaWxhYmxlX2J1dF9pbl9hcmNoaXZlIiwicGFnZV91bmF2YWlsYWJsZSIsInBhZ2VfdW5yZWFkYWJsZSJdfSwiZXZpZGVuY2Vfa2luZCI6eyJ0eXBlIjpbInN0cmluZyIsIm51bGwiXSwiZW51bSI6WyJxdW90ZV90ZXh0X21hdGNoIiwibGV4aWNhbF9jbGFpbV9tYXRjaCIsInF1b3RlX3RleHRfbWF0Y2hfYXJjaGl2ZSIsImxleGljYWxfY2xhaW1fbWF0Y2hfYXJjaGl2ZSIsInBhcnRpYWxfbGV4aWNhbF9tYXRjaCIsbnVsbF0sImRlc2NyaXB0aW9uIjoiV2hhdCBiYWNrcyB0aGUgdmVyZGljdC4gbGV4aWNhbF9jbGFpbV9tYXRjaCBtZWFucyB0aGUgY2xhaW0ncyB0ZXJtcyBhbmQgbnVtYmVycyBjby1vY2N1ciBvbiB0aGUgcGFnZTsgaXQgaXMgTk9UIHNlbWFudGljIHN1cHBvcnQgKGFuIGVudGl0eS1udW1iZXIgc3dhcCBjYW4gc3RpbGwgbWF0Y2gpLiBUcmVhdCBpdCBhcyByZXRyaWV2YWwsIG5vdCBwcm9vZi4ifSwiZXhwbGFuYXRpb24iOnsidHlwZSI6InN0cmluZyJ9LCJxdW90ZV9tYXRjaCI6eyJ0eXBlIjpbIm9iamVjdCIsIm51bGwiXX0sImNsYWltX21hdGNoIjp7InR5cGUiOlsib2JqZWN0IiwibnVsbCJdfSwiYXJjaGl2ZV9jb21wYXJpc29uIjp7InR5cGUiOlsib2JqZWN0IiwibnVsbCJdfSwidXJsX2NoZWNrIjp7InR5cGUiOiJvYmplY3QifSwiY2hlY2tlZF9hdCI6eyJ0eXBlIjoic3RyaW5nIiwiZm9ybWF0IjoiZGF0ZS10aW1lIiwiZGVzY3JpcHRpb24iOiJVVEMgdGltZSB0aGUgY2hlY2sgcmFuLiBBIGNhY2hlZCByZXN1bHQgaXMgYSBzbmFwc2hvdCBmcm9tIHRoaXMgdGltZS4ifSwidG9va19tcyI6eyJ0eXBlIjoiaW50ZWdlciJ9fSwicmVxdWlyZWQiOlsidmVyZGljdCIsImNoZWNrZWRfYXQiXX19LCJyZXF1aXJlZCI6WyJ0eXBlIl19fSwicmVxdWlyZWQiOlsiaW5wdXQiXX19fSwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9zdGlsbGN1cnJlbnQuc29tZXRoaW5nLWFnZW50LndvcmtlcnMuZGV2L2NoZWNrL2NpdGF0aW9uIiwiZGVzY3JpcHRpb24iOiJDaGVja3Mgd2hldGhlciBhIHF1b3RlZCBzZW50ZW5jZSBvciBhIGNsYWltIHN0aWxsIGFwcGVhcnMgb24gdGhlIGNpdGVkIHBhZ2UgKEhUTUwsIFBERiBvciB0ZXh0KS4gRXhhY3QsIHB1bmN0dWF0aW9uLWluc2Vuc2l0aXZlIGFuZCBmdXp6eSBxdW90ZSBtYXRjaGluZyB3aXRoIHNuaXBwZXQ7IGxleGljYWwgY2xhaW0gY2hlY2sgaW5jbC4gZXZlcnkgbnVtYmVyOyBjb21wYXJlcyB3aXRoIHRoZSBsYXRlc3QgYXJjaGl2ZS5vcmcgc25hcHNob3Qgd2hlbiBtaXNzaW5nOyBpbmNsdWRlcyB0aGUgZnVsbCBVUkwgbGl2ZW5lc3Mvc3RhbGVuZXNzIGNoZWNrLiIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiIsInNlcnZpY2VOYW1lIjoiU3RpbGxDdXJyZW50IiwidGFncyI6WyJjaXRhdGlvbnMiLCJsaW5rLWNoZWNraW5nIiwiZmFjdC1jaGVja2luZyIsImZyZXNobmVzcyIsInJlc2VhcmNoIl19LCJhY2NlcHRlZCI6eyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFtb3VudCI6IjIwMDAwIiwiYXNzZXQiOiIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMiLCJwYXlUbyI6IjB4MzMxOTBjOUQyNjYyRjk0QTE5Q0U4OEVBNjY2ZjBmZjhDZURlMzcwMCIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19fQ==",
+          "user-agent": "something-agent-selftest/1.0"
+        },
+        "body": {
+          "url": "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+          "quote": "SwapRouter02",
+          "claim": "Uniswap v3 is deployed on Base"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-origin": "*",
+          "access-control-expose-headers": "PAYMENT-REQUIRED,PAYMENT-RESPONSE,X-PAYMENT-RESPONSE,EXTENSION-RESPONSES",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "private",
+          "cf-ray": "a50a308ed84153d8-IAD",
+          "connection": "keep-alive",
+          "content-encoding": "br",
+          "content-type": "application/json",
+          "date": "Mon, 26 Oct 2026 14:35:50 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "payment-response": "eyJzdWNjZXNzIjp0cnVlLCJwYXllciI6IjB4MzMxOTBjOWQyNjYyZjk0YTE5Y2U4OGVhNjY2ZjBmZjhjZWRlMzcwMCIsInRyYW5zYWN0aW9uIjoiMHgzODExNmJkMmZlYzBkODkyNmIzMWUwMjNjYjc5OGEzNmJkNGIwNTIxNDJhNGVjMGVlNjVjMGQ4ZTZiOGNiYzYwIiwibmV0d29yayI6ImVpcDE1NTo4NDUzIn0=",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=DHcV9wNa6FGEliB0neYWdMfakgYN9%2B9fWvK%2B7Azt8GhF3boz78ap%2FxVA8pbl5RnN80YQZK7oQmujnJY5ylQeZ0VSa0VeKUgjLr%2BQHK5fIF4R3mkq1cIMZGsyJYaJ2ZR4Gr%2FZeerrTACS4teUZFxHURwbYJ8zS9cJfRaUipQ2z36pZNfSX9wh\"}]}",
+          "server": "cloudflare",
+          "transfer-encoding": "chunked"
+        },
+        "body": {
+          "url": "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+          "quote": "SwapRouter02",
+          "claim": "Uniswap v3 is deployed on Base",
+          "verdict": "verified",
+          "evidence_kind": "quote_text_match",
+          "explanation": "The quoted text appears on the live page.",
+          "quote_match": {
+            "match": "exact",
+            "score": 100,
+            "occurrences": 2,
+            "snippet": "…0eF17C07F7577e7ACd2d7 0xCbf8b7f80800bd4888Fbc7bf1713B80FE4E23E10 QuoterV2 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a 0xC5290058841028F1614F3A6F0F5816cAd0df5E27 SwapRouter02 0x2626664c2603336E57B271c5C0b26F421741e481 0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4 Permit2 0x000000000022D473030F116dDEE9F6B43aC78BA3 0x000000000022D473030F…",
+            "matched_text": "SwapRouter02",
+            "position": 0.5774
+          },
+          "claim_match": {
+            "verdict": "partially_supported_lexically",
+            "best_passage": "Base Deployments | Uniswap Developers LLMs.txt: agent-readable Markdown index of this site at /llms.txt Developers Docs API Reference Resources API keys API keys Search / Get Started Quick Start Concepts Swapping Overview Uniswap API Custom Linking Embed the Uniswap App Liquidity Overview Liquidity Provisioning Liquidity Launchpad UniswapX Protocols Overview Deployments Uniswap v4 Uniswap Labs Hooks Uniswap v3 Overview Concepts Guides Deployments Deployments Arbitrum Deployments Avalanche Deployments Base Deployments BNB Deployments CELO Deployments Ethereum Deployments HyperEVM Deployments",
+            "best_passage_coverage": 0.667,
+            "page_term_coverage": 1,
+            "numbers_in_claim": [],
+            "numbers_found_on_page": [],
+            "numbers_missing_from_page": [],
+            "method": "lexical: share of the claim's key terms and numbers found within a 2-sentence (max ~600 char) window. This is not semantic entailment; a negated or reworded claim can still score high."
+          },
+          "archive_comparison": null,
+          "url_check": {
+            "url": "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+            "verdict": "live",
+            "freshness": "fresh",
+            "usable_as_citation": true,
+            "recommended_action": "OK to cite.",
+            "evidence": [
+              "HTTP 200 after 2 redirect(s)",
+              "redirected to a different path: /docs/protocols/v3/deployments/v3-base-deployments",
+              "last updated 2026-08-25 (62 days ago, source json-ld.dateModified, confidence high)",
+              "latest good archive.org snapshot 2026-01-15"
+            ],
+            "http": {
+              "reachable": true,
+              "status": 200,
+              "final_url": "https://developers.uniswap.org/docs/protocols/v3/deployments/v3-base-deployments",
+              "redirect_chain": [
+                {
+                  "url": "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                  "status": 301
+                },
+                {
+                  "url": "https://developers.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                  "status": 301
+                },
+                {
+                  "url": "https://developers.uniswap.org/docs/protocols/v3/deployments/v3-base-deployments",
+                  "status": 200
+                }
+              ],
+              "content_type": "text/html",
+              "content_length_read": 314701,
+              "truncated": false,
+              "error": null,
+              "error_detail": null,
+              "etag": null,
+              "last_modified_header": null,
+              "elapsed_ms": 246
+            },
+            "page": {
+              "title": "Base Deployments | Uniswap Developers",
+              "text_chars": 4889
+            },
+            "dates": {
+              "last_updated": {
+                "date": "2026-08-25T05:58:55Z",
+                "source": "json-ld.dateModified",
+                "raw": "2026-08-25T05:58:55.000Z",
+                "confidence": "high",
+                "age_days": 62
+              },
+              "published": null,
+              "copyright_year": null,
+              "candidates": [
+                {
+                  "kind": "modified",
+                  "source": "json-ld.dateModified",
+                  "raw": "2026-08-25T05:58:55.000Z",
+                  "date": "2026-08-25T05:58:55Z"
+                }
+              ]
+            },
+            "archive": {
+              "source": "web.archive.org CDX API",
+              "latest": {
+                "timestamp": "2026-01-15T16:57:28Z",
+                "status": 200,
+                "url": "https://web.archive.org/web/20260115165728/https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                "raw_url": "https://web.archive.org/web/20260115165728id_/https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                "age_days": 283
+              },
+              "latest_ok": {
+                "timestamp": "2026-01-15T16:57:28Z",
+                "status": 200,
+                "url": "https://web.archive.org/web/20260115165728/https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                "raw_url": "https://web.archive.org/web/20260115165728id_/https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                "age_days": 283
+              },
+              "available": true
+            },
+            "checked_at": "2026-10-26T14:35:49Z",
+            "took_ms": 700
+          },
+          "checked_at": "2026-10-26T14:35:49Z",
+          "took_ms": 700
+        }
+      },
+      "decoded_headers": {
+        "request.payment-signature": {
+          "x402Version": 2,
+          "payload": {
+            "authorization": {
+              "from": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "to": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "value": "20000",
+              "validAfter": "0",
+              "validBefore": "1793025648",
+              "nonce": "0x9f80702e0121461853efb0157ae8eac2d9b2cd83108be8888a09ccfcd4e22a82"
+            },
+            "signature": "0x4440bedf2fba1b53a727f5b18ad0ad64a95fa73e727dbbae0339e6ff1e00ab9455d3fb9540f90b059f3c300b16906658595f4b1cb7443b73e804cb3fcbdedc4c1c"
+          },
+          "extensions": {
+            "bazaar": {
+              "info": {
+                "input": {
+                  "type": "http",
+                  "bodyType": "json",
+                  "body": {
+                    "url": "https://www.cdc.gov/nchs/fastats/life-expectancy.htm",
+                    "claim": "Life expectancy at birth in the US was 78.4 years"
+                  },
+                  "method": "POST"
+                },
+                "output": {
+                  "type": "json",
+                  "example": {
+                    "verdict": "partially_matched",
+                    "claim_match": {
+                      "verdict": "partially_supported_lexically",
+                      "numbers_found_on_page": [],
+                      "numbers_missing_from_page": [
+                        "78.4"
+                      ]
+                    },
+                    "checked_at": "2026-10-22T18:00:00Z",
+                    "took_ms": 655
+                  }
+                }
+              },
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "http"
+                      },
+                      "method": {
+                        "type": "string",
+                        "enum": [
+                          "POST"
+                        ]
+                      },
+                      "bodyType": {
+                        "type": "string",
+                        "enum": [
+                          "json",
+                          "form-data",
+                          "text"
+                        ]
+                      },
+                      "body": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "maxLength": 2048,
+                            "description": "Absolute http(s) URL of the cited page (HTML, PDF or plain text).",
+                            "title": "Url"
+                          },
+                          "quote": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 2000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Exact text the citation quotes. Matched exactly, then punctuation-insensitive, then fuzzy.",
+                            "title": "Quote"
+                          },
+                          "claim": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 1000
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "default": null,
+                            "description": "Paraphrased claim attributed to the source. Checked lexically: key terms and every number must appear near each other.",
+                            "title": "Claim"
+                          },
+                          "stale_after_days": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 36500,
+                            "default": 365,
+                            "title": "Stale After Days"
+                          },
+                          "check_archive_if_missing": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "If not found on the live page, also search the latest archive.org snapshot.",
+                            "title": "Check Archive If Missing"
+                          }
+                        },
+                        "required": [
+                          "url"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "method",
+                      "bodyType",
+                      "body"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "output": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "type": "object",
+                        "properties": {
+                          "verdict": {
+                            "type": "string",
+                            "enum": [
+                              "verified",
+                              "partially_matched",
+                              "not_found_on_page",
+                              "only_in_archive",
+                              "page_unavailable_but_in_archive",
+                              "page_unavailable",
+                              "page_unreadable"
+                            ]
+                          },
+                          "evidence_kind": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "quote_text_match",
+                              "lexical_claim_match",
+                              "quote_text_match_archive",
+                              "lexical_claim_match_archive",
+                              "partial_lexical_match",
+                              null
+                            ],
+                            "description": "What backs the verdict. lexical_claim_match means the claim's terms and numbers co-occur on the page; it is NOT semantic support (an entity-number swap can still match). Treat it as retrieval, not proof."
+                          },
+                          "explanation": {
+                            "type": "string"
+                          },
+                          "quote_match": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "claim_match": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "archive_comparison": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "url_check": {
+                            "type": "object"
+                          },
+                          "checked_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "UTC time the check ran. A cached result is a snapshot from this time."
+                          },
+                          "took_ms": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "verdict",
+                          "checked_at"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                },
+                "required": [
+                  "input"
+                ]
+              }
+            }
+          },
+          "resource": {
+            "url": "https://stillcurrent.something-agent.workers.dev/check/citation",
+            "description": "Checks whether a quoted sentence or a claim still appears on the cited page (HTML, PDF or text). Exact, punctuation-insensitive and fuzzy quote matching with snippet; lexical claim check incl. every number; compares with the latest archive.org snapshot when missing; includes the full URL liveness/staleness check.",
+            "mimeType": "application/json",
+            "serviceName": "StillCurrent",
+            "tags": [
+              "citations",
+              "link-checking",
+              "fact-checking",
+              "freshness",
+              "research"
+            ]
+          },
+          "accepted": {
+            "scheme": "exact",
+            "network": "eip155:8453",
+            "amount": "20000",
+            "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+            "maxTimeoutSeconds": 300,
+            "extra": {
+              "name": "USD Coin",
+              "version": "2"
+            }
+          }
+        },
+        "response.payment-response": {
+          "success": true,
+          "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+          "transaction": "0x38116bd2fec0d8926b31e023cb798a36bd4b052142a4ec0ee65c0d8e6b8cbc60",
+          "network": "eip155:8453"
+        }
+      }
+    }
+  ],
+  "final_status": 200,
+  "settlement": {
+    "success": true,
+    "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+    "transaction": "0x38116bd2fec0d8926b31e023cb798a36bd4b052142a4ec0ee65c0d8e6b8cbc60",
+    "network": "eip155:8453"
+  },
+  "finished": "2026-10-26T14:35:50.188Z"
+}

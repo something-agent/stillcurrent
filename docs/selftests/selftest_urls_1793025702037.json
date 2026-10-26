@@ -1,0 +1,758 @@
+{
+  "label": "SELF-TEST: operating wallet paying its own StillCurrent service (payer == payTo). Not revenue.",
+  "started": "2026-10-26T14:41:40.312Z",
+  "exchanges": [
+    {
+      "at": "2026-10-26T14:41:40.656Z",
+      "request": {
+        "method": "POST",
+        "url": "https://stillcurrent.something-agent.workers.dev/check/urls",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "something-agent-selftest/1.0"
+        },
+        "body": {
+          "urls": [
+            "https://www.x402.org/",
+            "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+            "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+            "https://eips.ethereum.org/EIPS/eip-8004",
+            "https://example.com/this-page-does-not-exist",
+            "http://github.com/erc-8004/erc-8004-contracts"
+          ]
+        }
+      },
+      "response": {
+        "status": 402,
+        "headers": {
+          "access-control-allow-origin": "*",
+          "access-control-expose-headers": "PAYMENT-REQUIRED,PAYMENT-RESPONSE,X-PAYMENT-RESPONSE,EXTENSION-RESPONSES",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "no-store",
+          "cf-ray": "a50a39240a1e05e3-IAD",
+          "connection": "keep-alive",
+          "content-length": "509",
+          "content-type": "application/json",
+          "date": "Mon, 26 Oct 2026 14:41:40 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9zdGlsbGN1cnJlbnQuc29tZXRoaW5nLWFnZW50LndvcmtlcnMuZGV2L2NoZWNrL3VybHMiLCJkZXNjcmlwdGlvbiI6IkxpbmsgdHJpYWdlIGZvciB1cCB0byAyNSBVUkxzIGluIG9uZSBjYWxsOiBIVFRQIHN0YXR1cywgcmVkaXJlY3QgY2hhaW4gKHVwIHRvIDQgaG9wcyksIHBhZ2UgdGl0bGUsIGFuZCBhIHZlcmRpY3QgcGVyIFVSTCAobGl2ZSwgcmVkaXJlY3RlZCwgcmVkaXJlY3RlZF9jcm9zc19kb21haW4sIG1vdmVkX3RvX2hvbWVwYWdlLCBkZWFkLCBibG9ja2VkLCBzZXJ2ZXJfZXJyb3IsIHVucmVhY2hhYmxlLCAuLi4pLiBMaWdodGVyIHRoYW4gL2NoZWNrL3VybDogbm8gYXJjaGl2ZS5vcmcgbG9va3VwIG9yIGxhc3QtdXBkYXRlZCBkYXRlLiBVc2UgaXQgdG8gZmluZCB3aGljaCBsaW5rcyBpbiBhIGRvY3VtZW50IG5lZWQgYSBmdWxsIGNoZWNrLiIsIm1pbWVUeXBlIjoiYXBwbGljYXRpb24vanNvbiIsInNlcnZpY2VOYW1lIjoiU3RpbGxDdXJyZW50IiwidGFncyI6WyJjaXRhdGlvbnMiLCJsaW5rLWNoZWNraW5nIiwiZmFjdC1jaGVja2luZyIsImZyZXNobmVzcyIsInJlc2VhcmNoIl19LCJhY2NlcHRzIjpbeyJzY2hlbWUiOiJleGFjdCIsIm5ldHdvcmsiOiJlaXAxNTU6ODQ1MyIsImFtb3VudCI6IjEwMDAwMCIsImFzc2V0IjoiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwicGF5VG8iOiIweDMzMTkwYzlEMjY2MkY5NEExOUNFODhFQTY2NmYwZmY4Q2VEZTM3MDAiLCJtYXhUaW1lb3V0U2Vjb25kcyI6MzAwLCJleHRyYSI6eyJuYW1lIjoiVVNEIENvaW4iLCJ2ZXJzaW9uIjoiMiJ9fV0sImV4dGVuc2lvbnMiOnsiYmF6YWFyIjp7ImluZm8iOnsiaW5wdXQiOnsidHlwZSI6Imh0dHAiLCJib2R5VHlwZSI6Impzb24iLCJib2R5Ijp7InVybHMiOlsiaHR0cHM6Ly9leGFtcGxlLmNvbS8iLCJodHRwczovL3d3dy54NDAyLm9yZy8iLCJodHRwczovL2V4YW1wbGUuY29tL21pc3NpbmctcGFnZSJdfSwibWV0aG9kIjoiUE9TVCJ9LCJvdXRwdXQiOnsidHlwZSI6Impzb24iLCJleGFtcGxlIjp7ImNoZWNrZWQiOjMsIm9rIjoyLCJub3Rfb2siOjEsImluY29tcGxldGUiOjAsInZlcmRpY3RfY291bnRzIjp7ImxpdmUiOjEsInJlZGlyZWN0ZWQiOjEsImRlYWQiOjF9LCJyZXN1bHRzIjpbeyJ1cmwiOiJodHRwczovL2V4YW1wbGUuY29tL21pc3NpbmctcGFnZSIsInZlcmRpY3QiOiJkZWFkIiwib2siOmZhbHNlLCJzdGF0dXMiOjQwNCwiY29tcGxldGUiOnRydWV9XSwiY2hlY2tlZF9hdCI6IjIwMjYtMTAtMjZUMTU6MDA6MDBaIiwidG9va19tcyI6MjMwfX19LCJzY2hlbWEiOnsiJHNjaGVtYSI6Imh0dHBzOi8vanNvbi1zY2hlbWEub3JnL2RyYWZ0LzIwMjAtMTIvc2NoZW1hIiwidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsiaW5wdXQiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidHlwZSI6eyJ0eXBlIjoic3RyaW5nIiwiY29uc3QiOiJodHRwIn0sIm1ldGhvZCI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJQT1NUIl19LCJib2R5VHlwZSI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJqc29uIiwiZm9ybS1kYXRhIiwidGV4dCJdfSwiYm9keSI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ1cmxzIjp7InR5cGUiOiJhcnJheSIsIm1pbkl0ZW1zIjoxLCJtYXhJdGVtcyI6MjUsIml0ZW1zIjp7InR5cGUiOiJzdHJpbmciLCJtYXhMZW5ndGgiOjIwNDh9LCJkZXNjcmlwdGlvbiI6IjEgdG8gMjUgYWJzb2x1dGUgaHR0cChzKSBVUkxzLiBEdXBsaWNhdGVzIGFyZSBjaGVja2VkIG9uY2UuIiwidGl0bGUiOiJVcmxzIn19LCJyZXF1aXJlZCI6WyJ1cmxzIl19fSwicmVxdWlyZWQiOlsidHlwZSIsIm1ldGhvZCIsImJvZHlUeXBlIiwiYm9keSJdLCJhZGRpdGlvbmFsUHJvcGVydGllcyI6ZmFsc2V9LCJvdXRwdXQiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidHlwZSI6eyJ0eXBlIjoic3RyaW5nIn0sImV4YW1wbGUiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsiY2hlY2tlZCI6eyJ0eXBlIjoiaW50ZWdlciJ9LCJ1bmlxdWUiOnsidHlwZSI6ImludGVnZXIifSwib2siOnsidHlwZSI6ImludGVnZXIifSwibm90X29rIjp7InR5cGUiOiJpbnRlZ2VyIn0sImluY29tcGxldGUiOnsidHlwZSI6ImludGVnZXIiLCJkZXNjcmlwdGlvbiI6IlVSTHMgd2hvc2UgcmVkaXJlY3QgY2hhaW4gY291bGQgbm90IGJlIGZ1bGx5IGZvbGxvd2VkIHdpdGhpbiB0aGUgcGVyLWNhbGwgcmVxdWVzdCBidWRnZXQgKHNlZSBwZW5kaW5nX2xvY2F0aW9uKS4ifSwidmVyZGljdF9jb3VudHMiOnsidHlwZSI6Im9iamVjdCJ9LCJyZXN1bHRzIjp7InR5cGUiOiJhcnJheSIsIml0ZW1zIjp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InVybCI6eyJ0eXBlIjoic3RyaW5nIn0sInZlcmRpY3QiOnsidHlwZSI6InN0cmluZyIsImVudW0iOlsibGl2ZSIsInJlZGlyZWN0ZWQiLCJyZWRpcmVjdGVkX2Nyb3NzX2RvbWFpbiIsIm1vdmVkX3RvX2hvbWVwYWdlIiwiZGVhZCIsImJsb2NrZWQiLCJzZXJ2ZXJfZXJyb3IiLCJjbGllbnRfZXJyb3IiLCJ1bnJlYWNoYWJsZSIsImludmFsaWRfdGFyZ2V0IiwicmVkaXJlY3Rfbm90X2ZvbGxvd2VkIl19LCJvayI6eyJ0eXBlIjoiYm9vbGVhbiJ9LCJzdGF0dXMiOnsidHlwZSI6WyJpbnRlZ2VyIiwibnVsbCJdfSwiZmluYWxfdXJsIjp7InR5cGUiOlsic3RyaW5nIiwibnVsbCJdfSwicmVkaXJlY3RfY2hhaW4iOnsidHlwZSI6ImFycmF5In0sInRpdGxlIjp7InR5cGUiOlsic3RyaW5nIiwibnVsbCJdfSwiY29tcGxldGUiOnsidHlwZSI6ImJvb2xlYW4ifSwicGVuZGluZ19sb2NhdGlvbiI6eyJ0eXBlIjoic3RyaW5nIn19LCJyZXF1aXJlZCI6WyJ1cmwiLCJ2ZXJkaWN0Iiwib2siLCJjb21wbGV0ZSJdfX0sImNoZWNrZWRfYXQiOnsidHlwZSI6InN0cmluZyIsImZvcm1hdCI6ImRhdGUtdGltZSJ9LCJ0b29rX21zIjp7InR5cGUiOiJpbnRlZ2VyIn19LCJyZXF1aXJlZCI6WyJjaGVja2VkIiwicmVzdWx0cyIsImNoZWNrZWRfYXQiXX19LCJyZXF1aXJlZCI6WyJ0eXBlIl19fSwicmVxdWlyZWQiOlsiaW5wdXQiXX19fX0=",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=elB7SjZd%2FWN7%2BKVIlQdVmkcQSl9SD3GZQesqKvZtBVUjdE39Yt%2F9ntx0QoxV0hTpoPMqQ0tq3jnUW214lB32B9O64gb9Gpk4lMXp7qw3BECSxJxu%2F7Xp%2BvkhndBx7qg43bu1sd2OwGAmxCigzM6Z%2Beb8IXN%2BcgHXN15%2Fe5O9NlOs6zQ8mIme\"}]}",
+          "server": "cloudflare"
+        },
+        "body": {
+          "x402Version": 2,
+          "error": "Payment required",
+          "message": "StillCurrent /check/urls costs $0.10 in USDC on eip155:8453. Payment requirements are in the PAYMENT-REQUIRED response header (base64-encoded JSON).",
+          "accepts": [
+            {
+              "scheme": "exact",
+              "network": "eip155:8453",
+              "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "amount": "100000",
+              "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "maxTimeoutSeconds": 300,
+              "extra": {
+                "name": "USD Coin",
+                "version": "2"
+              }
+            }
+          ],
+          "docs": "https://stillcurrent.something-agent.workers.dev/"
+        }
+      },
+      "decoded_headers": {
+        "response.payment-required": {
+          "x402Version": 2,
+          "error": "Payment required",
+          "resource": {
+            "url": "https://stillcurrent.something-agent.workers.dev/check/urls",
+            "description": "Link triage for up to 25 URLs in one call: HTTP status, redirect chain (up to 4 hops), page title, and a verdict per URL (live, redirected, redirected_cross_domain, moved_to_homepage, dead, blocked, server_error, unreachable, ...). Lighter than /check/url: no archive.org lookup or last-updated date. Use it to find which links in a document need a full check.",
+            "mimeType": "application/json",
+            "serviceName": "StillCurrent",
+            "tags": [
+              "citations",
+              "link-checking",
+              "fact-checking",
+              "freshness",
+              "research"
+            ]
+          },
+          "accepts": [
+            {
+              "scheme": "exact",
+              "network": "eip155:8453",
+              "amount": "100000",
+              "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "maxTimeoutSeconds": 300,
+              "extra": {
+                "name": "USD Coin",
+                "version": "2"
+              }
+            }
+          ],
+          "extensions": {
+            "bazaar": {
+              "info": {
+                "input": {
+                  "type": "http",
+                  "bodyType": "json",
+                  "body": {
+                    "urls": [
+                      "https://example.com/",
+                      "https://www.x402.org/",
+                      "https://example.com/missing-page"
+                    ]
+                  },
+                  "method": "POST"
+                },
+                "output": {
+                  "type": "json",
+                  "example": {
+                    "checked": 3,
+                    "ok": 2,
+                    "not_ok": 1,
+                    "incomplete": 0,
+                    "verdict_counts": {
+                      "live": 1,
+                      "redirected": 1,
+                      "dead": 1
+                    },
+                    "results": [
+                      {
+                        "url": "https://example.com/missing-page",
+                        "verdict": "dead",
+                        "ok": false,
+                        "status": 404,
+                        "complete": true
+                      }
+                    ],
+                    "checked_at": "2026-10-26T15:00:00Z",
+                    "took_ms": 230
+                  }
+                }
+              },
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "http"
+                      },
+                      "method": {
+                        "type": "string",
+                        "enum": [
+                          "POST"
+                        ]
+                      },
+                      "bodyType": {
+                        "type": "string",
+                        "enum": [
+                          "json",
+                          "form-data",
+                          "text"
+                        ]
+                      },
+                      "body": {
+                        "type": "object",
+                        "properties": {
+                          "urls": {
+                            "type": "array",
+                            "minItems": 1,
+                            "maxItems": 25,
+                            "items": {
+                              "type": "string",
+                              "maxLength": 2048
+                            },
+                            "description": "1 to 25 absolute http(s) URLs. Duplicates are checked once.",
+                            "title": "Urls"
+                          }
+                        },
+                        "required": [
+                          "urls"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "method",
+                      "bodyType",
+                      "body"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "output": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "type": "object",
+                        "properties": {
+                          "checked": {
+                            "type": "integer"
+                          },
+                          "unique": {
+                            "type": "integer"
+                          },
+                          "ok": {
+                            "type": "integer"
+                          },
+                          "not_ok": {
+                            "type": "integer"
+                          },
+                          "incomplete": {
+                            "type": "integer",
+                            "description": "URLs whose redirect chain could not be fully followed within the per-call request budget (see pending_location)."
+                          },
+                          "verdict_counts": {
+                            "type": "object"
+                          },
+                          "results": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "url": {
+                                  "type": "string"
+                                },
+                                "verdict": {
+                                  "type": "string",
+                                  "enum": [
+                                    "live",
+                                    "redirected",
+                                    "redirected_cross_domain",
+                                    "moved_to_homepage",
+                                    "dead",
+                                    "blocked",
+                                    "server_error",
+                                    "client_error",
+                                    "unreachable",
+                                    "invalid_target",
+                                    "redirect_not_followed"
+                                  ]
+                                },
+                                "ok": {
+                                  "type": "boolean"
+                                },
+                                "status": {
+                                  "type": [
+                                    "integer",
+                                    "null"
+                                  ]
+                                },
+                                "final_url": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "redirect_chain": {
+                                  "type": "array"
+                                },
+                                "title": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "complete": {
+                                  "type": "boolean"
+                                },
+                                "pending_location": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url",
+                                "verdict",
+                                "ok",
+                                "complete"
+                              ]
+                            }
+                          },
+                          "checked_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "took_ms": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "checked",
+                          "results",
+                          "checked_at"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                },
+                "required": [
+                  "input"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-26T14:41:42.037Z",
+      "request": {
+        "method": "POST",
+        "url": "https://stillcurrent.something-agent.workers.dev/check/urls",
+        "headers": {
+          "access-control-expose-headers": "PAYMENT-RESPONSE,X-PAYMENT-RESPONSE",
+          "content-type": "application/json",
+          "payment-signature": "eyJ4NDAyVmVyc2lvbiI6MiwicGF5bG9hZCI6eyJhdXRob3JpemF0aW9uIjp7ImZyb20iOiIweDMzMTkwYzlEMjY2MkY5NEExOUNFODhFQTY2NmYwZmY4Q2VEZTM3MDAiLCJ0byI6IjB4MzMxOTBjOUQyNjYyRjk0QTE5Q0U4OEVBNjY2ZjBmZjhDZURlMzcwMCIsInZhbHVlIjoiMTAwMDAwIiwidmFsaWRBZnRlciI6IjAiLCJ2YWxpZEJlZm9yZSI6IjE3OTMwMjYwMDAiLCJub25jZSI6IjB4MDI1NDQ3MzEwZGY0MzhlMDY1NTczYzY4MDQ4NjY0ZmUyZmI4MWJiY2MwY2VjNWNmNzI5YWFmM2RkMjk1ZmRhMCJ9LCJzaWduYXR1cmUiOiIweDlkMmNjOTc0N2Y2MzFlYzhlYjc5Mzk1NzZjNTE2ZGE1YzMyYTEyOTg2MzE5YTkzMzAxZDllNmVhODc5NzY3ZmQ1NTBlYWZjNTBjNWJjMzM2MzNmN2RmYjRjZmM1MDA1N2IyMWM5OGU3ODEzNDBmZDFlNjU0ZTU2ZTA3MWZlYmU5MWMifSwiZXh0ZW5zaW9ucyI6eyJiYXphYXIiOnsiaW5mbyI6eyJpbnB1dCI6eyJ0eXBlIjoiaHR0cCIsImJvZHlUeXBlIjoianNvbiIsImJvZHkiOnsidXJscyI6WyJodHRwczovL2V4YW1wbGUuY29tLyIsImh0dHBzOi8vd3d3Lng0MDIub3JnLyIsImh0dHBzOi8vZXhhbXBsZS5jb20vbWlzc2luZy1wYWdlIl19LCJtZXRob2QiOiJQT1NUIn0sIm91dHB1dCI6eyJ0eXBlIjoianNvbiIsImV4YW1wbGUiOnsiY2hlY2tlZCI6Mywib2siOjIsIm5vdF9vayI6MSwiaW5jb21wbGV0ZSI6MCwidmVyZGljdF9jb3VudHMiOnsibGl2ZSI6MSwicmVkaXJlY3RlZCI6MSwiZGVhZCI6MX0sInJlc3VsdHMiOlt7InVybCI6Imh0dHBzOi8vZXhhbXBsZS5jb20vbWlzc2luZy1wYWdlIiwidmVyZGljdCI6ImRlYWQiLCJvayI6ZmFsc2UsInN0YXR1cyI6NDA0LCJjb21wbGV0ZSI6dHJ1ZX1dLCJjaGVja2VkX2F0IjoiMjAyNi0xMC0yNlQxNTowMDowMFoiLCJ0b29rX21zIjoyMzB9fX0sInNjaGVtYSI6eyIkc2NoZW1hIjoiaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWEiLCJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJpbnB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmciLCJjb25zdCI6Imh0dHAifSwibWV0aG9kIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbIlBPU1QiXX0sImJvZHlUeXBlIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbImpzb24iLCJmb3JtLWRhdGEiLCJ0ZXh0Il19LCJib2R5Ijp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InVybHMiOnsidHlwZSI6ImFycmF5IiwibWluSXRlbXMiOjEsIm1heEl0ZW1zIjoyNSwiaXRlbXMiOnsidHlwZSI6InN0cmluZyIsIm1heExlbmd0aCI6MjA0OH0sImRlc2NyaXB0aW9uIjoiMSB0byAyNSBhYnNvbHV0ZSBodHRwKHMpIFVSTHMuIER1cGxpY2F0ZXMgYXJlIGNoZWNrZWQgb25jZS4iLCJ0aXRsZSI6IlVybHMifX0sInJlcXVpcmVkIjpbInVybHMiXX19LCJyZXF1aXJlZCI6WyJ0eXBlIiwibWV0aG9kIiwiYm9keVR5cGUiLCJib2R5Il0sImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZX0sIm91dHB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmcifSwiZXhhbXBsZSI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJjaGVja2VkIjp7InR5cGUiOiJpbnRlZ2VyIn0sInVuaXF1ZSI6eyJ0eXBlIjoiaW50ZWdlciJ9LCJvayI6eyJ0eXBlIjoiaW50ZWdlciJ9LCJub3Rfb2siOnsidHlwZSI6ImludGVnZXIifSwiaW5jb21wbGV0ZSI6eyJ0eXBlIjoiaW50ZWdlciIsImRlc2NyaXB0aW9uIjoiVVJMcyB3aG9zZSByZWRpcmVjdCBjaGFpbiBjb3VsZCBub3QgYmUgZnVsbHkgZm9sbG93ZWQgd2l0aGluIHRoZSBwZXItY2FsbCByZXF1ZXN0IGJ1ZGdldCAoc2VlIHBlbmRpbmdfbG9jYXRpb24pLiJ9LCJ2ZXJkaWN0X2NvdW50cyI6eyJ0eXBlIjoib2JqZWN0In0sInJlc3VsdHMiOnsidHlwZSI6ImFycmF5IiwiaXRlbXMiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidXJsIjp7InR5cGUiOiJzdHJpbmcifSwidmVyZGljdCI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJsaXZlIiwicmVkaXJlY3RlZCIsInJlZGlyZWN0ZWRfY3Jvc3NfZG9tYWluIiwibW92ZWRfdG9faG9tZXBhZ2UiLCJkZWFkIiwiYmxvY2tlZCIsInNlcnZlcl9lcnJvciIsImNsaWVudF9lcnJvciIsInVucmVhY2hhYmxlIiwiaW52YWxpZF90YXJnZXQiLCJyZWRpcmVjdF9ub3RfZm9sbG93ZWQiXX0sIm9rIjp7InR5cGUiOiJib29sZWFuIn0sInN0YXR1cyI6eyJ0eXBlIjpbImludGVnZXIiLCJudWxsIl19LCJmaW5hbF91cmwiOnsidHlwZSI6WyJzdHJpbmciLCJudWxsIl19LCJyZWRpcmVjdF9jaGFpbiI6eyJ0eXBlIjoiYXJyYXkifSwidGl0bGUiOnsidHlwZSI6WyJzdHJpbmciLCJudWxsIl19LCJjb21wbGV0ZSI6eyJ0eXBlIjoiYm9vbGVhbiJ9LCJwZW5kaW5nX2xvY2F0aW9uIjp7InR5cGUiOiJzdHJpbmcifX0sInJlcXVpcmVkIjpbInVybCIsInZlcmRpY3QiLCJvayIsImNvbXBsZXRlIl19fSwiY2hlY2tlZF9hdCI6eyJ0eXBlIjoic3RyaW5nIiwiZm9ybWF0IjoiZGF0ZS10aW1lIn0sInRvb2tfbXMiOnsidHlwZSI6ImludGVnZXIifX0sInJlcXVpcmVkIjpbImNoZWNrZWQiLCJyZXN1bHRzIiwiY2hlY2tlZF9hdCJdfX0sInJlcXVpcmVkIjpbInR5cGUiXX19LCJyZXF1aXJlZCI6WyJpbnB1dCJdfX19LCJyZXNvdXJjZSI6eyJ1cmwiOiJodHRwczovL3N0aWxsY3VycmVudC5zb21ldGhpbmctYWdlbnQud29ya2Vycy5kZXYvY2hlY2svdXJscyIsImRlc2NyaXB0aW9uIjoiTGluayB0cmlhZ2UgZm9yIHVwIHRvIDI1IFVSTHMgaW4gb25lIGNhbGw6IEhUVFAgc3RhdHVzLCByZWRpcmVjdCBjaGFpbiAodXAgdG8gNCBob3BzKSwgcGFnZSB0aXRsZSwgYW5kIGEgdmVyZGljdCBwZXIgVVJMIChsaXZlLCByZWRpcmVjdGVkLCByZWRpcmVjdGVkX2Nyb3NzX2RvbWFpbiwgbW92ZWRfdG9faG9tZXBhZ2UsIGRlYWQsIGJsb2NrZWQsIHNlcnZlcl9lcnJvciwgdW5yZWFjaGFibGUsIC4uLikuIExpZ2h0ZXIgdGhhbiAvY2hlY2svdXJsOiBubyBhcmNoaXZlLm9yZyBsb29rdXAgb3IgbGFzdC11cGRhdGVkIGRhdGUuIFVzZSBpdCB0byBmaW5kIHdoaWNoIGxpbmtzIGluIGEgZG9jdW1lbnQgbmVlZCBhIGZ1bGwgY2hlY2suIiwibWltZVR5cGUiOiJhcHBsaWNhdGlvbi9qc29uIiwic2VydmljZU5hbWUiOiJTdGlsbEN1cnJlbnQiLCJ0YWdzIjpbImNpdGF0aW9ucyIsImxpbmstY2hlY2tpbmciLCJmYWN0LWNoZWNraW5nIiwiZnJlc2huZXNzIiwicmVzZWFyY2giXX0sImFjY2VwdGVkIjp7InNjaGVtZSI6ImV4YWN0IiwibmV0d29yayI6ImVpcDE1NTo4NDUzIiwiYW1vdW50IjoiMTAwMDAwIiwiYXNzZXQiOiIweDgzMzU4OWZDRDZlRGI2RTA4ZjRjN0MzMkQ0ZjcxYjU0YmRBMDI5MTMiLCJwYXlUbyI6IjB4MzMxOTBjOUQyNjYyRjk0QTE5Q0U4OEVBNjY2ZjBmZjhDZURlMzcwMCIsIm1heFRpbWVvdXRTZWNvbmRzIjozMDAsImV4dHJhIjp7Im5hbWUiOiJVU0QgQ29pbiIsInZlcnNpb24iOiIyIn19fQ==",
+          "user-agent": "something-agent-selftest/1.0"
+        },
+        "body": {
+          "urls": [
+            "https://www.x402.org/",
+            "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+            "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+            "https://eips.ethereum.org/EIPS/eip-8004",
+            "https://example.com/this-page-does-not-exist",
+            "http://github.com/erc-8004/erc-8004-contracts"
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-origin": "*",
+          "access-control-expose-headers": "PAYMENT-REQUIRED,PAYMENT-RESPONSE,X-PAYMENT-RESPONSE,EXTENSION-RESPONSES",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "private",
+          "cf-ray": "a50a39259eac3567-IAD",
+          "connection": "keep-alive",
+          "content-encoding": "br",
+          "content-type": "application/json",
+          "date": "Mon, 26 Oct 2026 14:41:42 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "payment-response": "eyJzdWNjZXNzIjp0cnVlLCJwYXllciI6IjB4MzMxOTBjOWQyNjYyZjk0YTE5Y2U4OGVhNjY2ZjBmZjhjZWRlMzcwMCIsInRyYW5zYWN0aW9uIjoiMHgyZDNmZDZhYzBmMjZmYjgxZDg3NjNjMGE0ZGM3MjNhM2UyMDlhOWE1ZGExMjk0NmNkYzZjMjBkZDU4NzY2NmMxIiwibmV0d29yayI6ImVpcDE1NTo4NDUzIn0=",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=0LM89kk7SBKCxeJQMkHe8VttGlkGgClUO1wSjvja%2Bw7EMG9RiuMf2ra6JlfD5ls7YK6CP8MPvak7YuXirhxTXtqhBBC2PPqiET3RcsFiJlBLcEh5Zo0NIDUqPGThyRtaILU%2BZ6cZrdQA7OqCfFMdxc%2Fvlp6iQ9VBzCobPxAwuTT9tD6VuThR\"}]}",
+          "server": "cloudflare",
+          "transfer-encoding": "chunked"
+        },
+        "body": {
+          "checked": 6,
+          "unique": 6,
+          "ok": 5,
+          "not_ok": 1,
+          "incomplete": 0,
+          "verdict_counts": {
+            "redirected": 3,
+            "live": 2,
+            "dead": 1
+          },
+          "results": [
+            {
+              "url": "https://www.x402.org/",
+              "verdict": "redirected",
+              "ok": true,
+              "status": 200,
+              "final_url": "https://x402.org/",
+              "redirect_chain": [
+                {
+                  "url": "https://www.x402.org/",
+                  "status": 301
+                },
+                {
+                  "url": "https://x402.org/",
+                  "status": 200
+                }
+              ],
+              "title": "x402",
+              "content_type": "text/html; charset=UTF-8",
+              "error": null,
+              "complete": true,
+              "elapsed_ms": 549
+            },
+            {
+              "url": "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+              "verdict": "redirected",
+              "ok": true,
+              "status": 200,
+              "final_url": "https://developers.uniswap.org/docs/protocols/v3/deployments/v3-base-deployments",
+              "redirect_chain": [
+                {
+                  "url": "https://docs.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                  "status": 301
+                },
+                {
+                  "url": "https://developers.uniswap.org/contracts/v3/reference/deployments/base-deployments",
+                  "status": 301
+                },
+                {
+                  "url": "https://developers.uniswap.org/docs/protocols/v3/deployments/v3-base-deployments",
+                  "status": 200
+                }
+              ],
+              "title": "Base Deployments | Uniswap Developers",
+              "content_type": "text/html",
+              "error": null,
+              "complete": true,
+              "elapsed_ms": 310
+            },
+            {
+              "url": "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+              "verdict": "live",
+              "ok": true,
+              "status": 200,
+              "final_url": "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+              "redirect_chain": [
+                {
+                  "url": "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+                  "status": 200
+                }
+              ],
+              "title": "USDC contract addresses - Circle Docs",
+              "content_type": "text/html; charset=utf-8",
+              "error": null,
+              "complete": true,
+              "elapsed_ms": 215
+            },
+            {
+              "url": "https://eips.ethereum.org/EIPS/eip-8004",
+              "verdict": "live",
+              "ok": true,
+              "status": 200,
+              "final_url": "https://eips.ethereum.org/EIPS/eip-8004",
+              "redirect_chain": [
+                {
+                  "url": "https://eips.ethereum.org/EIPS/eip-8004",
+                  "status": 200
+                }
+              ],
+              "title": "ERC-8004: Trustless Agents",
+              "content_type": "text/html; charset=utf-8",
+              "error": null,
+              "complete": true,
+              "elapsed_ms": 100
+            },
+            {
+              "url": "https://example.com/this-page-does-not-exist",
+              "verdict": "dead",
+              "ok": false,
+              "status": 404,
+              "final_url": "https://example.com/this-page-does-not-exist",
+              "redirect_chain": [
+                {
+                  "url": "https://example.com/this-page-does-not-exist",
+                  "status": 404
+                }
+              ],
+              "title": null,
+              "content_type": "text/html; charset=utf-8",
+              "error": null,
+              "complete": true,
+              "elapsed_ms": 12
+            },
+            {
+              "url": "http://github.com/erc-8004/erc-8004-contracts",
+              "verdict": "redirected",
+              "ok": true,
+              "status": 200,
+              "final_url": "https://github.com/erc-8004/erc-8004-contracts",
+              "redirect_chain": [
+                {
+                  "url": "http://github.com/erc-8004/erc-8004-contracts",
+                  "status": 301
+                },
+                {
+                  "url": "https://github.com/erc-8004/erc-8004-contracts",
+                  "status": 200
+                }
+              ],
+              "title": null,
+              "content_type": "text/html; charset=utf-8",
+              "error": null,
+              "complete": true,
+              "elapsed_ms": 516
+            }
+          ],
+          "note": "Batch triage: one GET per hop (max 4), no archive.org lookup or date extraction. Use POST /check/url on any result for the full check.",
+          "checked_at": "2026-10-26T14:41:41Z",
+          "took_ms": 549
+        }
+      },
+      "decoded_headers": {
+        "request.payment-signature": {
+          "x402Version": 2,
+          "payload": {
+            "authorization": {
+              "from": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "to": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "value": "100000",
+              "validAfter": "0",
+              "validBefore": "1793026000",
+              "nonce": "0x025447310df438e065573c68048664fe2fb81bbcc0cec5cf729aaf3dd295fda0"
+            },
+            "signature": "0x9d2cc9747f631ec8eb7939576c516da5c32a12986319a93301d9e6ea879767fd550eafc50c5bc33633f7dfb4cfc50057b21c98e781340fd1e654e56e071febe91c"
+          },
+          "extensions": {
+            "bazaar": {
+              "info": {
+                "input": {
+                  "type": "http",
+                  "bodyType": "json",
+                  "body": {
+                    "urls": [
+                      "https://example.com/",
+                      "https://www.x402.org/",
+                      "https://example.com/missing-page"
+                    ]
+                  },
+                  "method": "POST"
+                },
+                "output": {
+                  "type": "json",
+                  "example": {
+                    "checked": 3,
+                    "ok": 2,
+                    "not_ok": 1,
+                    "incomplete": 0,
+                    "verdict_counts": {
+                      "live": 1,
+                      "redirected": 1,
+                      "dead": 1
+                    },
+                    "results": [
+                      {
+                        "url": "https://example.com/missing-page",
+                        "verdict": "dead",
+                        "ok": false,
+                        "status": 404,
+                        "complete": true
+                      }
+                    ],
+                    "checked_at": "2026-10-26T15:00:00Z",
+                    "took_ms": 230
+                  }
+                }
+              },
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "http"
+                      },
+                      "method": {
+                        "type": "string",
+                        "enum": [
+                          "POST"
+                        ]
+                      },
+                      "bodyType": {
+                        "type": "string",
+                        "enum": [
+                          "json",
+                          "form-data",
+                          "text"
+                        ]
+                      },
+                      "body": {
+                        "type": "object",
+                        "properties": {
+                          "urls": {
+                            "type": "array",
+                            "minItems": 1,
+                            "maxItems": 25,
+                            "items": {
+                              "type": "string",
+                              "maxLength": 2048
+                            },
+                            "description": "1 to 25 absolute http(s) URLs. Duplicates are checked once.",
+                            "title": "Urls"
+                          }
+                        },
+                        "required": [
+                          "urls"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "method",
+                      "bodyType",
+                      "body"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "output": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "type": "object",
+                        "properties": {
+                          "checked": {
+                            "type": "integer"
+                          },
+                          "unique": {
+                            "type": "integer"
+                          },
+                          "ok": {
+                            "type": "integer"
+                          },
+                          "not_ok": {
+                            "type": "integer"
+                          },
+                          "incomplete": {
+                            "type": "integer",
+                            "description": "URLs whose redirect chain could not be fully followed within the per-call request budget (see pending_location)."
+                          },
+                          "verdict_counts": {
+                            "type": "object"
+                          },
+                          "results": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "url": {
+                                  "type": "string"
+                                },
+                                "verdict": {
+                                  "type": "string",
+                                  "enum": [
+                                    "live",
+                                    "redirected",
+                                    "redirected_cross_domain",
+                                    "moved_to_homepage",
+                                    "dead",
+                                    "blocked",
+                                    "server_error",
+                                    "client_error",
+                                    "unreachable",
+                                    "invalid_target",
+                                    "redirect_not_followed"
+                                  ]
+                                },
+                                "ok": {
+                                  "type": "boolean"
+                                },
+                                "status": {
+                                  "type": [
+                                    "integer",
+                                    "null"
+                                  ]
+                                },
+                                "final_url": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "redirect_chain": {
+                                  "type": "array"
+                                },
+                                "title": {
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
+                                "complete": {
+                                  "type": "boolean"
+                                },
+                                "pending_location": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url",
+                                "verdict",
+                                "ok",
+                                "complete"
+                              ]
+                            }
+                          },
+                          "checked_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "took_ms": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "checked",
+                          "results",
+                          "checked_at"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                },
+                "required": [
+                  "input"
+                ]
+              }
+            }
+          },
+          "resource": {
+            "url": "https://stillcurrent.something-agent.workers.dev/check/urls",
+            "description": "Link triage for up to 25 URLs in one call: HTTP status, redirect chain (up to 4 hops), page title, and a verdict per URL (live, redirected, redirected_cross_domain, moved_to_homepage, dead, blocked, server_error, unreachable, ...). Lighter than /check/url: no archive.org lookup or last-updated date. Use it to find which links in a document need a full check.",
+            "mimeType": "application/json",
+            "serviceName": "StillCurrent",
+            "tags": [
+              "citations",
+              "link-checking",
+              "fact-checking",
+              "freshness",
+              "research"
+            ]
+          },
+          "accepted": {
+            "scheme": "exact",
+            "network": "eip155:8453",
+            "amount": "100000",
+            "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+            "maxTimeoutSeconds": 300,
+            "extra": {
+              "name": "USD Coin",
+              "version": "2"
+            }
+          }
+        },
+        "response.payment-response": {
+          "success": true,
+          "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+          "transaction": "0x2d3fd6ac0f26fb81d8763c0a4dc723a3e209a9a5da12946cdc6c20dd587666c1",
+          "network": "eip155:8453"
+        }
+      }
+    }
+  ],
+  "final_status": 200,
+  "settlement": {
+    "success": true,
+    "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+    "transaction": "0x2d3fd6ac0f26fb81d8763c0a4dc723a3e209a9a5da12946cdc6c20dd587666c1",
+    "network": "eip155:8453"
+  },
+  "finished": "2026-10-26T14:41:42.037Z"
+}

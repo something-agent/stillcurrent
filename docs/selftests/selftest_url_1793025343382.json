@@ -1,0 +1,611 @@
+{
+  "label": "SELF-TEST: operating wallet paying its own StillCurrent service (payer == payTo). Not revenue.",
+  "started": "2026-10-26T14:35:40.806Z",
+  "exchanges": [
+    {
+      "at": "2026-10-26T14:35:41.265Z",
+      "request": {
+        "method": "POST",
+        "url": "https://stillcurrent.something-agent.workers.dev/check/url",
+        "headers": {
+          "content-type": "application/json",
+          "user-agent": "something-agent-selftest/1.0"
+        },
+        "body": {
+          "url": "https://www.x402.org/",
+          "stale_after_days": 365
+        }
+      },
+      "response": {
+        "status": 402,
+        "headers": {
+          "access-control-allow-origin": "*",
+          "access-control-expose-headers": "PAYMENT-REQUIRED,PAYMENT-RESPONSE,X-PAYMENT-RESPONSE,EXTENSION-RESPONSES",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "no-store",
+          "cf-ray": "a50a305cdf9c8233-IAD",
+          "connection": "keep-alive",
+          "content-length": "507",
+          "content-type": "application/json",
+          "date": "Mon, 26 Oct 2026 14:35:41 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "payment-required": "eyJ4NDAyVmVyc2lvbiI6MiwiZXJyb3IiOiJQYXltZW50IHJlcXVpcmVkIiwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9zdGlsbGN1cnJlbnQuc29tZXRoaW5nLWFnZW50LndvcmtlcnMuZGV2L2NoZWNrL3VybCIsImRlc2NyaXB0aW9uIjoiQ2hlY2tzIHdoZXRoZXIgYSBVUkwgKHNvdXJjZSwgY2l0YXRpb24gb3IgZGF0YXNldCkgaXMgc3RpbGwgYWxpdmUgYW5kIGN1cnJlbnQ6IEhUVFAgc3RhdHVzIGFuZCByZWRpcmVjdCBjaGFpbiwgc29mdC00MDQgLyBwYXJrZWQtZG9tYWluIC8gcmVkaXJlY3QtdG8taG9tZXBhZ2UgZGV0ZWN0aW9uLCBsYXN0LXVwZGF0ZWQgZGF0ZSBmcm9tIG1ldGFkYXRhIG9yIHBhZ2UgdGV4dCwgbGF0ZXN0IGFyY2hpdmUub3JnIHNuYXBzaG90LCBhbmQgYSB2ZXJkaWN0IChsaXZlLCBsaXZlX3N0YWxlLCBkZWFkLCBtb3ZlZF90b19ob21lcGFnZSwgc29mdF80MDQsIGJsb2NrZWQsIC4uLikgd2l0aCBldmlkZW5jZS4iLCJtaW1lVHlwZSI6ImFwcGxpY2F0aW9uL2pzb24iLCJzZXJ2aWNlTmFtZSI6IlN0aWxsQ3VycmVudCIsInRhZ3MiOlsiY2l0YXRpb25zIiwibGluay1jaGVja2luZyIsImZhY3QtY2hlY2tpbmciLCJmcmVzaG5lc3MiLCJyZXNlYXJjaCJdfSwiYWNjZXB0cyI6W3sic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJhbW91bnQiOiIxMDAwMCIsImFzc2V0IjoiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwicGF5VG8iOiIweDMzMTkwYzlEMjY2MkY5NEExOUNFODhFQTY2NmYwZmY4Q2VEZTM3MDAiLCJtYXhUaW1lb3V0U2Vjb25kcyI6MzAwLCJleHRyYSI6eyJuYW1lIjoiVVNEIENvaW4iLCJ2ZXJzaW9uIjoiMiJ9fV0sImV4dGVuc2lvbnMiOnsiYmF6YWFyIjp7ImluZm8iOnsiaW5wdXQiOnsidHlwZSI6Imh0dHAiLCJib2R5VHlwZSI6Impzb24iLCJib2R5Ijp7InVybCI6Imh0dHBzOi8vd3d3LmNkYy5nb3YvbmNocy9mYXN0YXRzL2xpZmUtZXhwZWN0YW5jeS5odG0iLCJzdGFsZV9hZnRlcl9kYXlzIjozNjV9LCJtZXRob2QiOiJQT1NUIn0sIm91dHB1dCI6eyJ0eXBlIjoianNvbiIsImV4YW1wbGUiOnsidmVyZGljdCI6ImxpdmUiLCJmcmVzaG5lc3MiOiJmcmVzaCIsInVzYWJsZV9hc19jaXRhdGlvbiI6dHJ1ZSwiZXZpZGVuY2UiOlsiSFRUUCAyMDAgYWZ0ZXIgMCByZWRpcmVjdChzKSIsImxhc3QgdXBkYXRlZCAyMDI2LTA5LTI5ICgyMyBkYXlzIGFnbywgc291cmNlIHRleHRbJ2xhc3QgcmV2aWV3ZWQnXSwgY29uZmlkZW5jZSBtZWRpdW0pIiwibGF0ZXN0IGdvb2QgYXJjaGl2ZS5vcmcgc25hcHNob3QgMjAyNi0xMC0xNiJdLCJjaGVja2VkX2F0IjoiMjAyNi0xMC0yMlQxODowMDowMFoiLCJ0b29rX21zIjo0MTJ9fX0sInNjaGVtYSI6eyIkc2NoZW1hIjoiaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWEiLCJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJpbnB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmciLCJjb25zdCI6Imh0dHAifSwibWV0aG9kIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbIlBPU1QiXX0sImJvZHlUeXBlIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbImpzb24iLCJmb3JtLWRhdGEiLCJ0ZXh0Il19LCJib2R5Ijp7InR5cGUiOiJvYmplY3QiLCJwcm9wZXJ0aWVzIjp7InVybCI6eyJ0eXBlIjoic3RyaW5nIiwibWF4TGVuZ3RoIjoyMDQ4LCJkZXNjcmlwdGlvbiI6IkFic29sdXRlIGh0dHAocykgVVJMIG9mIHRoZSBzb3VyY2UsIGNpdGF0aW9uIG9yIGRhdGFzZXQgdG8gY2hlY2suIiwidGl0bGUiOiJVcmwifSwic3RhbGVfYWZ0ZXJfZGF5cyI6eyJ0eXBlIjoiaW50ZWdlciIsIm1pbmltdW0iOjEsIm1heGltdW0iOjM2NTAwLCJkZWZhdWx0IjozNjUsImRlc2NyaXB0aW9uIjoiQWdlIChkYXlzIHNpbmNlIGxhc3QgdXBkYXRlKSBhZnRlciB3aGljaCBhIGxpdmUgcGFnZSBpcyByZXBvcnRlZCBhcyBzdGFsZS4iLCJ0aXRsZSI6IlN0YWxlIEFmdGVyIERheXMifSwiaW5jbHVkZV9hcmNoaXZlIjp7InR5cGUiOiJib29sZWFuIiwiZGVmYXVsdCI6dHJ1ZSwiZGVzY3JpcHRpb24iOiJMb29rIHVwIHRoZSBsYXRlc3QgYXJjaGl2ZS5vcmcgV2F5YmFjayBNYWNoaW5lIHNuYXBzaG90LiIsInRpdGxlIjoiSW5jbHVkZSBBcmNoaXZlIn19LCJyZXF1aXJlZCI6WyJ1cmwiXX19LCJyZXF1aXJlZCI6WyJ0eXBlIiwibWV0aG9kIiwiYm9keVR5cGUiLCJib2R5Il0sImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZX0sIm91dHB1dCI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ0eXBlIjp7InR5cGUiOiJzdHJpbmcifSwiZXhhbXBsZSI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ2ZXJkaWN0Ijp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbImxpdmUiLCJsaXZlX3N0YWxlIiwicmVkaXJlY3RlZF9jcm9zc19kb21haW4iLCJtb3ZlZF90b19ob21lcGFnZSIsInNvZnRfNDA0IiwicGFya2VkIiwiZGVhZCIsInVucmVhY2hhYmxlIiwiYmxvY2tlZCIsImludmFsaWRfdGFyZ2V0Il19LCJmcmVzaG5lc3MiOnsidHlwZSI6InN0cmluZyIsImVudW0iOlsiZnJlc2giLCJzdGFsZSIsInBvc3NpYmx5X3N0YWxlIiwidW5rbm93biJdfSwidXNhYmxlX2FzX2NpdGF0aW9uIjp7InR5cGUiOlsiYm9vbGVhbiIsIm51bGwiXX0sInJlY29tbWVuZGVkX2FjdGlvbiI6eyJ0eXBlIjoic3RyaW5nIn0sImV2aWRlbmNlIjp7InR5cGUiOiJhcnJheSIsIml0ZW1zIjp7InR5cGUiOiJzdHJpbmcifX0sImh0dHAiOnsidHlwZSI6Im9iamVjdCJ9LCJkYXRlcyI6eyJ0eXBlIjoib2JqZWN0In0sImFyY2hpdmUiOnsidHlwZSI6WyJvYmplY3QiLCJudWxsIl19LCJ3aWtpcGVkaWEiOnsidHlwZSI6Im9iamVjdCJ9LCJsZWdpc2xhdGlvbl9nb3ZfdWsiOnsidHlwZSI6Im9iamVjdCJ9LCJjaGVja2VkX2F0Ijp7InR5cGUiOiJzdHJpbmciLCJmb3JtYXQiOiJkYXRlLXRpbWUiLCJkZXNjcmlwdGlvbiI6IlVUQyB0aW1lIHRoZSBjaGVjayByYW4uIEEgY2FjaGVkIHJlc3VsdCBpcyBhIHNuYXBzaG90IGZyb20gdGhpcyB0aW1lLiJ9LCJ0b29rX21zIjp7InR5cGUiOiJpbnRlZ2VyIn19LCJyZXF1aXJlZCI6WyJ2ZXJkaWN0IiwiY2hlY2tlZF9hdCJdfX0sInJlcXVpcmVkIjpbInR5cGUiXX19LCJyZXF1aXJlZCI6WyJpbnB1dCJdfX19fQ==",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=zH6A0rZuG8q9xAJREvqMBbr%2F3OCZW6tC7CMlipn65AhU19zy%2FmrLY3uFvzDaH%2FJ%2B4t0KMFT3Z9hyIIlk1fOL%2FO5NCXiej9D%2FQUv1Aet8Q2yOPckYmklyqw8T4%2F8sD8Fa6fKw6qbm7q5GcsEtcmMRTntCL7xDTfz2on8OqK3KJwMTZKer6RDo\"}]}",
+          "server": "cloudflare"
+        },
+        "body": {
+          "x402Version": 2,
+          "error": "Payment required",
+          "message": "StillCurrent /check/url costs $0.01 in USDC on eip155:8453. Payment requirements are in the PAYMENT-REQUIRED response header (base64-encoded JSON).",
+          "accepts": [
+            {
+              "scheme": "exact",
+              "network": "eip155:8453",
+              "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "amount": "10000",
+              "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "maxTimeoutSeconds": 300,
+              "extra": {
+                "name": "USD Coin",
+                "version": "2"
+              }
+            }
+          ],
+          "docs": "https://stillcurrent.something-agent.workers.dev/"
+        }
+      },
+      "decoded_headers": {
+        "response.payment-required": {
+          "x402Version": 2,
+          "error": "Payment required",
+          "resource": {
+            "url": "https://stillcurrent.something-agent.workers.dev/check/url",
+            "description": "Checks whether a URL (source, citation or dataset) is still alive and current: HTTP status and redirect chain, soft-404 / parked-domain / redirect-to-homepage detection, last-updated date from metadata or page text, latest archive.org snapshot, and a verdict (live, live_stale, dead, moved_to_homepage, soft_404, blocked, ...) with evidence.",
+            "mimeType": "application/json",
+            "serviceName": "StillCurrent",
+            "tags": [
+              "citations",
+              "link-checking",
+              "fact-checking",
+              "freshness",
+              "research"
+            ]
+          },
+          "accepts": [
+            {
+              "scheme": "exact",
+              "network": "eip155:8453",
+              "amount": "10000",
+              "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "maxTimeoutSeconds": 300,
+              "extra": {
+                "name": "USD Coin",
+                "version": "2"
+              }
+            }
+          ],
+          "extensions": {
+            "bazaar": {
+              "info": {
+                "input": {
+                  "type": "http",
+                  "bodyType": "json",
+                  "body": {
+                    "url": "https://www.cdc.gov/nchs/fastats/life-expectancy.htm",
+                    "stale_after_days": 365
+                  },
+                  "method": "POST"
+                },
+                "output": {
+                  "type": "json",
+                  "example": {
+                    "verdict": "live",
+                    "freshness": "fresh",
+                    "usable_as_citation": true,
+                    "evidence": [
+                      "HTTP 200 after 0 redirect(s)",
+                      "last updated 2026-09-29 (23 days ago, source text['last reviewed'], confidence medium)",
+                      "latest good archive.org snapshot 2026-10-16"
+                    ],
+                    "checked_at": "2026-10-22T18:00:00Z",
+                    "took_ms": 412
+                  }
+                }
+              },
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "http"
+                      },
+                      "method": {
+                        "type": "string",
+                        "enum": [
+                          "POST"
+                        ]
+                      },
+                      "bodyType": {
+                        "type": "string",
+                        "enum": [
+                          "json",
+                          "form-data",
+                          "text"
+                        ]
+                      },
+                      "body": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "maxLength": 2048,
+                            "description": "Absolute http(s) URL of the source, citation or dataset to check.",
+                            "title": "Url"
+                          },
+                          "stale_after_days": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 36500,
+                            "default": 365,
+                            "description": "Age (days since last update) after which a live page is reported as stale.",
+                            "title": "Stale After Days"
+                          },
+                          "include_archive": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "Look up the latest archive.org Wayback Machine snapshot.",
+                            "title": "Include Archive"
+                          }
+                        },
+                        "required": [
+                          "url"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "method",
+                      "bodyType",
+                      "body"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "output": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "type": "object",
+                        "properties": {
+                          "verdict": {
+                            "type": "string",
+                            "enum": [
+                              "live",
+                              "live_stale",
+                              "redirected_cross_domain",
+                              "moved_to_homepage",
+                              "soft_404",
+                              "parked",
+                              "dead",
+                              "unreachable",
+                              "blocked",
+                              "invalid_target"
+                            ]
+                          },
+                          "freshness": {
+                            "type": "string",
+                            "enum": [
+                              "fresh",
+                              "stale",
+                              "possibly_stale",
+                              "unknown"
+                            ]
+                          },
+                          "usable_as_citation": {
+                            "type": [
+                              "boolean",
+                              "null"
+                            ]
+                          },
+                          "recommended_action": {
+                            "type": "string"
+                          },
+                          "evidence": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "http": {
+                            "type": "object"
+                          },
+                          "dates": {
+                            "type": "object"
+                          },
+                          "archive": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "wikipedia": {
+                            "type": "object"
+                          },
+                          "legislation_gov_uk": {
+                            "type": "object"
+                          },
+                          "checked_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "UTC time the check ran. A cached result is a snapshot from this time."
+                          },
+                          "took_ms": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "verdict",
+                          "checked_at"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                },
+                "required": [
+                  "input"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "at": "2026-10-26T14:35:43.381Z",
+      "request": {
+        "method": "POST",
+        "url": "https://stillcurrent.something-agent.workers.dev/check/url",
+        "headers": {
+          "access-control-expose-headers": "PAYMENT-RESPONSE,X-PAYMENT-RESPONSE",
+          "content-type": "application/json",
+          "payment-signature": "eyJ4NDAyVmVyc2lvbiI6MiwicGF5bG9hZCI6eyJhdXRob3JpemF0aW9uIjp7ImZyb20iOiIweDMzMTkwYzlEMjY2MkY5NEExOUNFODhFQTY2NmYwZmY4Q2VEZTM3MDAiLCJ0byI6IjB4MzMxOTBjOUQyNjYyRjk0QTE5Q0U4OEVBNjY2ZjBmZjhDZURlMzcwMCIsInZhbHVlIjoiMTAwMDAiLCJ2YWxpZEFmdGVyIjoiMCIsInZhbGlkQmVmb3JlIjoiMTc5MzAyNTY0MSIsIm5vbmNlIjoiMHg4ZGM1ZGViNjc3YTA3MDk0OTIwMjAzMzRiMTdhY2YxMTg4NDhhMGZkNDA4ODFiZWVhMWRlZmQ3YjdiZDYwNDdkIn0sInNpZ25hdHVyZSI6IjB4NzIxNjRhNTExMjljY2NkZjVhZGFmZmM4YjQ3ZTc5YjlmOWUxNzIzODU0MTZkZTA4NzA0MTcwYmI5MjBmNTUxNDNhODljNmFmNmZmODEyNjgzZGNiNDIxMWQ2ZGQ5MDcyNTEwNTM0ZmY2ODhhMzg0NTIzYzM0YzE3N2NjZGUxZTQxYiJ9LCJleHRlbnNpb25zIjp7ImJhemFhciI6eyJpbmZvIjp7ImlucHV0Ijp7InR5cGUiOiJodHRwIiwiYm9keVR5cGUiOiJqc29uIiwiYm9keSI6eyJ1cmwiOiJodHRwczovL3d3dy5jZGMuZ292L25jaHMvZmFzdGF0cy9saWZlLWV4cGVjdGFuY3kuaHRtIiwic3RhbGVfYWZ0ZXJfZGF5cyI6MzY1fSwibWV0aG9kIjoiUE9TVCJ9LCJvdXRwdXQiOnsidHlwZSI6Impzb24iLCJleGFtcGxlIjp7InZlcmRpY3QiOiJsaXZlIiwiZnJlc2huZXNzIjoiZnJlc2giLCJ1c2FibGVfYXNfY2l0YXRpb24iOnRydWUsImV2aWRlbmNlIjpbIkhUVFAgMjAwIGFmdGVyIDAgcmVkaXJlY3QocykiLCJsYXN0IHVwZGF0ZWQgMjAyNi0wOS0yOSAoMjMgZGF5cyBhZ28sIHNvdXJjZSB0ZXh0WydsYXN0IHJldmlld2VkJ10sIGNvbmZpZGVuY2UgbWVkaXVtKSIsImxhdGVzdCBnb29kIGFyY2hpdmUub3JnIHNuYXBzaG90IDIwMjYtMTAtMTYiXSwiY2hlY2tlZF9hdCI6IjIwMjYtMTAtMjJUMTg6MDA6MDBaIiwidG9va19tcyI6NDEyfX19LCJzY2hlbWEiOnsiJHNjaGVtYSI6Imh0dHBzOi8vanNvbi1zY2hlbWEub3JnL2RyYWZ0LzIwMjAtMTIvc2NoZW1hIiwidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsiaW5wdXQiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidHlwZSI6eyJ0eXBlIjoic3RyaW5nIiwiY29uc3QiOiJodHRwIn0sIm1ldGhvZCI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJQT1NUIl19LCJib2R5VHlwZSI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJqc29uIiwiZm9ybS1kYXRhIiwidGV4dCJdfSwiYm9keSI6eyJ0eXBlIjoib2JqZWN0IiwicHJvcGVydGllcyI6eyJ1cmwiOnsidHlwZSI6InN0cmluZyIsIm1heExlbmd0aCI6MjA0OCwiZGVzY3JpcHRpb24iOiJBYnNvbHV0ZSBodHRwKHMpIFVSTCBvZiB0aGUgc291cmNlLCBjaXRhdGlvbiBvciBkYXRhc2V0IHRvIGNoZWNrLiIsInRpdGxlIjoiVXJsIn0sInN0YWxlX2FmdGVyX2RheXMiOnsidHlwZSI6ImludGVnZXIiLCJtaW5pbXVtIjoxLCJtYXhpbXVtIjozNjUwMCwiZGVmYXVsdCI6MzY1LCJkZXNjcmlwdGlvbiI6IkFnZSAoZGF5cyBzaW5jZSBsYXN0IHVwZGF0ZSkgYWZ0ZXIgd2hpY2ggYSBsaXZlIHBhZ2UgaXMgcmVwb3J0ZWQgYXMgc3RhbGUuIiwidGl0bGUiOiJTdGFsZSBBZnRlciBEYXlzIn0sImluY2x1ZGVfYXJjaGl2ZSI6eyJ0eXBlIjoiYm9vbGVhbiIsImRlZmF1bHQiOnRydWUsImRlc2NyaXB0aW9uIjoiTG9vayB1cCB0aGUgbGF0ZXN0IGFyY2hpdmUub3JnIFdheWJhY2sgTWFjaGluZSBzbmFwc2hvdC4iLCJ0aXRsZSI6IkluY2x1ZGUgQXJjaGl2ZSJ9fSwicmVxdWlyZWQiOlsidXJsIl19fSwicmVxdWlyZWQiOlsidHlwZSIsIm1ldGhvZCIsImJvZHlUeXBlIiwiYm9keSJdLCJhZGRpdGlvbmFsUHJvcGVydGllcyI6ZmFsc2V9LCJvdXRwdXQiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidHlwZSI6eyJ0eXBlIjoic3RyaW5nIn0sImV4YW1wbGUiOnsidHlwZSI6Im9iamVjdCIsInByb3BlcnRpZXMiOnsidmVyZGljdCI6eyJ0eXBlIjoic3RyaW5nIiwiZW51bSI6WyJsaXZlIiwibGl2ZV9zdGFsZSIsInJlZGlyZWN0ZWRfY3Jvc3NfZG9tYWluIiwibW92ZWRfdG9faG9tZXBhZ2UiLCJzb2Z0XzQwNCIsInBhcmtlZCIsImRlYWQiLCJ1bnJlYWNoYWJsZSIsImJsb2NrZWQiLCJpbnZhbGlkX3RhcmdldCJdfSwiZnJlc2huZXNzIjp7InR5cGUiOiJzdHJpbmciLCJlbnVtIjpbImZyZXNoIiwic3RhbGUiLCJwb3NzaWJseV9zdGFsZSIsInVua25vd24iXX0sInVzYWJsZV9hc19jaXRhdGlvbiI6eyJ0eXBlIjpbImJvb2xlYW4iLCJudWxsIl19LCJyZWNvbW1lbmRlZF9hY3Rpb24iOnsidHlwZSI6InN0cmluZyJ9LCJldmlkZW5jZSI6eyJ0eXBlIjoiYXJyYXkiLCJpdGVtcyI6eyJ0eXBlIjoic3RyaW5nIn19LCJodHRwIjp7InR5cGUiOiJvYmplY3QifSwiZGF0ZXMiOnsidHlwZSI6Im9iamVjdCJ9LCJhcmNoaXZlIjp7InR5cGUiOlsib2JqZWN0IiwibnVsbCJdfSwid2lraXBlZGlhIjp7InR5cGUiOiJvYmplY3QifSwibGVnaXNsYXRpb25fZ292X3VrIjp7InR5cGUiOiJvYmplY3QifSwiY2hlY2tlZF9hdCI6eyJ0eXBlIjoic3RyaW5nIiwiZm9ybWF0IjoiZGF0ZS10aW1lIiwiZGVzY3JpcHRpb24iOiJVVEMgdGltZSB0aGUgY2hlY2sgcmFuLiBBIGNhY2hlZCByZXN1bHQgaXMgYSBzbmFwc2hvdCBmcm9tIHRoaXMgdGltZS4ifSwidG9va19tcyI6eyJ0eXBlIjoiaW50ZWdlciJ9fSwicmVxdWlyZWQiOlsidmVyZGljdCIsImNoZWNrZWRfYXQiXX19LCJyZXF1aXJlZCI6WyJ0eXBlIl19fSwicmVxdWlyZWQiOlsiaW5wdXQiXX19fSwicmVzb3VyY2UiOnsidXJsIjoiaHR0cHM6Ly9zdGlsbGN1cnJlbnQuc29tZXRoaW5nLWFnZW50LndvcmtlcnMuZGV2L2NoZWNrL3VybCIsImRlc2NyaXB0aW9uIjoiQ2hlY2tzIHdoZXRoZXIgYSBVUkwgKHNvdXJjZSwgY2l0YXRpb24gb3IgZGF0YXNldCkgaXMgc3RpbGwgYWxpdmUgYW5kIGN1cnJlbnQ6IEhUVFAgc3RhdHVzIGFuZCByZWRpcmVjdCBjaGFpbiwgc29mdC00MDQgLyBwYXJrZWQtZG9tYWluIC8gcmVkaXJlY3QtdG8taG9tZXBhZ2UgZGV0ZWN0aW9uLCBsYXN0LXVwZGF0ZWQgZGF0ZSBmcm9tIG1ldGFkYXRhIG9yIHBhZ2UgdGV4dCwgbGF0ZXN0IGFyY2hpdmUub3JnIHNuYXBzaG90LCBhbmQgYSB2ZXJkaWN0IChsaXZlLCBsaXZlX3N0YWxlLCBkZWFkLCBtb3ZlZF90b19ob21lcGFnZSwgc29mdF80MDQsIGJsb2NrZWQsIC4uLikgd2l0aCBldmlkZW5jZS4iLCJtaW1lVHlwZSI6ImFwcGxpY2F0aW9uL2pzb24iLCJzZXJ2aWNlTmFtZSI6IlN0aWxsQ3VycmVudCIsInRhZ3MiOlsiY2l0YXRpb25zIiwibGluay1jaGVja2luZyIsImZhY3QtY2hlY2tpbmciLCJmcmVzaG5lc3MiLCJyZXNlYXJjaCJdfSwiYWNjZXB0ZWQiOnsic2NoZW1lIjoiZXhhY3QiLCJuZXR3b3JrIjoiZWlwMTU1Ojg0NTMiLCJhbW91bnQiOiIxMDAwMCIsImFzc2V0IjoiMHg4MzM1ODlmQ0Q2ZURiNkUwOGY0YzdDMzJENGY3MWI1NGJkQTAyOTEzIiwicGF5VG8iOiIweDMzMTkwYzlEMjY2MkY5NEExOUNFODhFQTY2NmYwZmY4Q2VEZTM3MDAiLCJtYXhUaW1lb3V0U2Vjb25kcyI6MzAwLCJleHRyYSI6eyJuYW1lIjoiVVNEIENvaW4iLCJ2ZXJzaW9uIjoiMiJ9fX0=",
+          "user-agent": "something-agent-selftest/1.0"
+        },
+        "body": {
+          "url": "https://www.x402.org/",
+          "stale_after_days": 365
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "access-control-allow-origin": "*",
+          "access-control-expose-headers": "PAYMENT-REQUIRED,PAYMENT-RESPONSE,X-PAYMENT-RESPONSE,EXTENSION-RESPONSES",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "private",
+          "cf-ray": "a50a305f597c3496-IAD",
+          "connection": "keep-alive",
+          "content-encoding": "br",
+          "content-type": "application/json",
+          "date": "Mon, 26 Oct 2026 14:35:43 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "payment-response": "eyJzdWNjZXNzIjp0cnVlLCJwYXllciI6IjB4MzMxOTBjOWQyNjYyZjk0YTE5Y2U4OGVhNjY2ZjBmZjhjZWRlMzcwMCIsInRyYW5zYWN0aW9uIjoiMHg3MDE4OGIwNWQ4ZWI4NmRiNTY4MmU2NzNlY2U3MzM2NzFlNGY4YzZkMTU5ZGQxYTU5N2M1MTQ4OTA5ZTg1MzMwIiwibmV0d29yayI6ImVpcDE1NTo4NDUzIn0=",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=DM0Q6foW7Z1Cc7zmXRO5u1ksWnIv2CV6G5n4JOiopEMz3oWysimJgUly2UiRdkbQlmfGcrJ7Hv7GHwwb6vbNQRdHS6VJB%2F8ADLM2n8zByQsKDftVajtH2TbK2JEjwtvkkz7o0VNFFkpPmUue9krCDi%2BuHA3E4jCJUJYT9me8nHakC37gYKNd\"}]}",
+          "server": "cloudflare",
+          "transfer-encoding": "chunked"
+        },
+        "body": {
+          "url": "https://www.x402.org/",
+          "verdict": "live",
+          "freshness": "unknown",
+          "usable_as_citation": true,
+          "recommended_action": "OK to cite.",
+          "evidence": [
+            "HTTP 200 after 1 redirect(s)",
+            "latest good archive.org snapshot 2026-10-12"
+          ],
+          "http": {
+            "reachable": true,
+            "status": 200,
+            "final_url": "https://x402.org/",
+            "redirect_chain": [
+              {
+                "url": "https://www.x402.org/",
+                "status": 301
+              },
+              {
+                "url": "https://x402.org/",
+                "status": 200
+              }
+            ],
+            "content_type": "text/html",
+            "content_length_read": 93470,
+            "truncated": false,
+            "error": null,
+            "error_detail": null,
+            "etag": null,
+            "last_modified_header": null,
+            "elapsed_ms": 451
+          },
+          "page": {
+            "title": "x402",
+            "text_chars": 4102
+          },
+          "dates": {
+            "last_updated": null,
+            "published": null,
+            "copyright_year": null,
+            "candidates": []
+          },
+          "archive": {
+            "source": "web.archive.org CDX API",
+            "latest": {
+              "timestamp": "2026-10-12T22:47:09Z",
+              "status": 200,
+              "url": "https://web.archive.org/web/20261012224709/https://x402.org/",
+              "raw_url": "https://web.archive.org/web/20261012224709id_/https://x402.org/",
+              "age_days": 13
+            },
+            "latest_ok": {
+              "timestamp": "2026-10-12T22:47:09Z",
+              "status": 200,
+              "url": "https://web.archive.org/web/20261012224709/https://x402.org/",
+              "raw_url": "https://web.archive.org/web/20261012224709id_/https://x402.org/",
+              "age_days": 13
+            },
+            "available": true
+          },
+          "checked_at": "2026-10-26T14:35:42Z",
+          "took_ms": 1180
+        }
+      },
+      "decoded_headers": {
+        "request.payment-signature": {
+          "x402Version": 2,
+          "payload": {
+            "authorization": {
+              "from": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "to": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+              "value": "10000",
+              "validAfter": "0",
+              "validBefore": "1793025641",
+              "nonce": "0x8dc5deb677a0709492020334b17acf118848a0fd40881beea1defd7b7bd6047d"
+            },
+            "signature": "0x72164a51129cccdf5adaffc8b47e79b9f9e172385416de08704170bb920f55143a89c6af6ff812683dcb4211d6dd9072510534ff688a384523c34c177ccde1e41b"
+          },
+          "extensions": {
+            "bazaar": {
+              "info": {
+                "input": {
+                  "type": "http",
+                  "bodyType": "json",
+                  "body": {
+                    "url": "https://www.cdc.gov/nchs/fastats/life-expectancy.htm",
+                    "stale_after_days": 365
+                  },
+                  "method": "POST"
+                },
+                "output": {
+                  "type": "json",
+                  "example": {
+                    "verdict": "live",
+                    "freshness": "fresh",
+                    "usable_as_citation": true,
+                    "evidence": [
+                      "HTTP 200 after 0 redirect(s)",
+                      "last updated 2026-09-29 (23 days ago, source text['last reviewed'], confidence medium)",
+                      "latest good archive.org snapshot 2026-10-16"
+                    ],
+                    "checked_at": "2026-10-22T18:00:00Z",
+                    "took_ms": 412
+                  }
+                }
+              },
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "const": "http"
+                      },
+                      "method": {
+                        "type": "string",
+                        "enum": [
+                          "POST"
+                        ]
+                      },
+                      "bodyType": {
+                        "type": "string",
+                        "enum": [
+                          "json",
+                          "form-data",
+                          "text"
+                        ]
+                      },
+                      "body": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "maxLength": 2048,
+                            "description": "Absolute http(s) URL of the source, citation or dataset to check.",
+                            "title": "Url"
+                          },
+                          "stale_after_days": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 36500,
+                            "default": 365,
+                            "description": "Age (days since last update) after which a live page is reported as stale.",
+                            "title": "Stale After Days"
+                          },
+                          "include_archive": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "Look up the latest archive.org Wayback Machine snapshot.",
+                            "title": "Include Archive"
+                          }
+                        },
+                        "required": [
+                          "url"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "method",
+                      "bodyType",
+                      "body"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "output": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "example": {
+                        "type": "object",
+                        "properties": {
+                          "verdict": {
+                            "type": "string",
+                            "enum": [
+                              "live",
+                              "live_stale",
+                              "redirected_cross_domain",
+                              "moved_to_homepage",
+                              "soft_404",
+                              "parked",
+                              "dead",
+                              "unreachable",
+                              "blocked",
+                              "invalid_target"
+                            ]
+                          },
+                          "freshness": {
+                            "type": "string",
+                            "enum": [
+                              "fresh",
+                              "stale",
+                              "possibly_stale",
+                              "unknown"
+                            ]
+                          },
+                          "usable_as_citation": {
+                            "type": [
+                              "boolean",
+                              "null"
+                            ]
+                          },
+                          "recommended_action": {
+                            "type": "string"
+                          },
+                          "evidence": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "http": {
+                            "type": "object"
+                          },
+                          "dates": {
+                            "type": "object"
+                          },
+                          "archive": {
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
+                          "wikipedia": {
+                            "type": "object"
+                          },
+                          "legislation_gov_uk": {
+                            "type": "object"
+                          },
+                          "checked_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "UTC time the check ran. A cached result is a snapshot from this time."
+                          },
+                          "took_ms": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "verdict",
+                          "checked_at"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                },
+                "required": [
+                  "input"
+                ]
+              }
+            }
+          },
+          "resource": {
+            "url": "https://stillcurrent.something-agent.workers.dev/check/url",
+            "description": "Checks whether a URL (source, citation or dataset) is still alive and current: HTTP status and redirect chain, soft-404 / parked-domain / redirect-to-homepage detection, last-updated date from metadata or page text, latest archive.org snapshot, and a verdict (live, live_stale, dead, moved_to_homepage, soft_404, blocked, ...) with evidence.",
+            "mimeType": "application/json",
+            "serviceName": "StillCurrent",
+            "tags": [
+              "citations",
+              "link-checking",
+              "fact-checking",
+              "freshness",
+              "research"
+            ]
+          },
+          "accepted": {
+            "scheme": "exact",
+            "network": "eip155:8453",
+            "amount": "10000",
+            "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "payTo": "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700",
+            "maxTimeoutSeconds": 300,
+            "extra": {
+              "name": "USD Coin",
+              "version": "2"
+            }
+          }
+        },
+        "response.payment-response": {
+          "success": true,
+          "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+          "transaction": "0x70188b05d8eb86db5682e673ece733671e4f8c6d159dd1a597c5148909e85330",
+          "network": "eip155:8453"
+        }
+      }
+    }
+  ],
+  "final_status": 200,
+  "settlement": {
+    "success": true,
+    "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+    "transaction": "0x70188b05d8eb86db5682e673ece733671e4f8c6d159dd1a597c5148909e85330",
+    "network": "eip155:8453"
+  },
+  "finished": "2026-10-26T14:35:43.382Z"
+}
