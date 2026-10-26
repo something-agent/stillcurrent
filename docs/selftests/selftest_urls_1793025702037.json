@@ -754,5 +754,18 @@
     "transaction": "0x2d3fd6ac0f26fb81d8763c0a4dc723a3e209a9a5da12946cdc6c20dd587666c1",
     "network": "eip155:8453"
   },
-  "finished": "2026-10-26T14:41:42.037Z"
+  "finished": "2026-10-26T14:41:42.037Z",
+  "counterparty": {
+    "class": "self",
+    "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+    "payee": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+    "basis": "payer == payTo (same operating wallet)",
+    "count_as_revenue": false,
+    "vocabulary": [
+      "self",
+      "related",
+      "outside"
+    ],
+    "added": "2026-10-26, after a suggestion on The Colony"
+  }
 }

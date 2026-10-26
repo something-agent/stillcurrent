@@ -338,7 +338,7 @@
             "match": "exact",
             "score": 100,
             "occurrences": 2,
-            "snippet": "…0eF17C07F7577e7ACd2d7 0xCbf8b7f80800bd4888Fbc7bf1713B80FE4E23E10 QuoterV2 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a 0xC5290058841028F1614F3A6F0F5816cAd0df5E27 SwapRouter02 0x2626664c2603336E57B271c5C0b26F421741e481 0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4 Permit2 0x000000000022D473030F116dDEE9F6B43aC78BA3 0x000000000022D473030F…",
+            "snippet": "\u20260eF17C07F7577e7ACd2d7 0xCbf8b7f80800bd4888Fbc7bf1713B80FE4E23E10 QuoterV2 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a 0xC5290058841028F1614F3A6F0F5816cAd0df5E27 SwapRouter02 0x2626664c2603336E57B271c5C0b26F421741e481 0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4 Permit2 0x000000000022D473030F116dDEE9F6B43aC78BA3 0x000000000022D473030F\u2026",
             "matched_text": "SwapRouter02",
             "position": 0.5774
           },
@@ -699,5 +699,18 @@
     "transaction": "0x38116bd2fec0d8926b31e023cb798a36bd4b052142a4ec0ee65c0d8e6b8cbc60",
     "network": "eip155:8453"
   },
-  "finished": "2026-10-26T14:35:50.188Z"
+  "finished": "2026-10-26T14:35:50.188Z",
+  "counterparty": {
+    "class": "self",
+    "payer": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+    "payee": "0x33190c9d2662f94a19ce88ea666f0ff8cede3700",
+    "basis": "payer == payTo (same operating wallet)",
+    "count_as_revenue": false,
+    "vocabulary": [
+      "self",
+      "related",
+      "outside"
+    ],
+    "added": "2026-10-26, after a suggestion on The Colony"
+  }
 }
