@@ -120,12 +120,19 @@ function timeField(obj: any, key: string, errs: ValidationError[]): number | nul
   return t;
 }
 
+const PAY_ALIASES: Record<string, string> = { amount: "amount_usdc", amount_usd: "amount_usdc", value: "amount_usdc", to: "payee", from: "payer", payto: "payee", pay_to: "payee", confirmations: "min_confirmations", hash: "tx_hash", transaction: "tx_hash", txhash: "tx_hash" };
+// An unknown key costs the caller a round trip; name the permitted keys (and the likely intended one) in the free 422.
+function extraMsg(k: string, allowed: Set<string>): string {
+  const guess = PAY_ALIASES[k.toLowerCase()];
+  return `Extra inputs are not permitted. Permitted keys here: ${[...allowed].join(", ")}` + (guess && allowed.has(guess) ? `. Did you mean '${guess}'?` : "");
+}
+
 export function validatePaymentVerify(raw: unknown): { ok: true; value: PaymentRequest } | { ok: false; errors: ValidationError[] } {
   const errs: ValidationError[] = [];
   const body = asObject(raw, errs);
   if (!body) return { ok: false, errors: errs };
   const allowed = new Set(["tx_hash", "payment_response", "network", "expect", "cross_check"]);
-  for (const k of Object.keys(body)) if (!allowed.has(k)) errs.push({ loc: ["body", k], msg: "Extra inputs are not permitted", type: "extra_forbidden" });
+  for (const k of Object.keys(body)) if (!allowed.has(k)) errs.push({ loc: ["body", k], msg: extraMsg(k, allowed), type: "extra_forbidden" });
 
   let txHash: string | null = null;
   const th = body.tx_hash;
@@ -162,7 +169,7 @@ export function validatePaymentVerify(raw: unknown): { ok: true; value: PaymentR
   else if (typeof ex !== "object" || Array.isArray(ex)) errs.push({ loc: ["body", "expect"], msg: "Input should be a valid dictionary or object", type: "model_attributes_type" });
   const e: any = ex && typeof ex === "object" && !Array.isArray(ex) ? ex : {};
   const eAllowed = new Set(["payee", "payer", "amount_usdc", "amount_atomic", "amount_match", "min_confirmations", "not_before", "not_after", "x402"]);
-  for (const k of Object.keys(e)) if (!eAllowed.has(k)) errs.push({ loc: ["body", "expect", k], msg: "Extra inputs are not permitted", type: "extra_forbidden" });
+  for (const k of Object.keys(e)) if (!eAllowed.has(k)) errs.push({ loc: ["body", "expect", k], msg: extraMsg(k, eAllowed), type: "extra_forbidden" });
   const payee = addrField(e, "payee", ["body", "expect"], errs);
   const payer = addrField(e, "payer", ["body", "expect"], errs);
   let amount: bigint | null = null;

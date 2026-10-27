@@ -1,6 +1,6 @@
 /** Static descriptions, examples and JSON schemas (mirrors the Python service). */
 export const SERVICE_NAME = "StillCurrent";
-export const VERSION = "0.4.0-worker";
+export const VERSION = "0.4.1-worker";
 export const SERVICE_DESC =
   "Pay-per-call checks that tell you whether a source is still current (link liveness and staleness, whether a quoted sentence or claim " +
   "still appears on the cited page, with archive.org fallback) and whether a claimed USDC payment on Base really settled (to the right address, for the right amount).";
@@ -155,7 +155,7 @@ export const PAY_INPUT_EXAMPLE = {
   tx_hash: "0x2d3fd6ac0f26fb81d8763c0a4dc723a3e209a9a5da12946cdc6c20dd587666c1",
   expect: { payee: "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700", amount_usdc: "0.10", min_confirmations: 12, x402: true },
 };
-export const VERDICTS_PAY = ["match", "mismatch", "not_settled", "not_found", "no_usdc_transfer"];
+export const VERDICTS_PAY = ["match", "mismatch", "not_settled", "not_found", "no_usdc_transfer", "unconfirmed"];
 export const PAY_INPUT_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -210,7 +210,8 @@ export const PAY_OUTPUT_EXAMPLE = { verdict: "match", settled: true, matched: tr
 export const PAY_OUTPUT_SCHEMA = {
   type: "object",
   properties: {
-    verdict: { type: "string", enum: VERDICTS_PAY, description: "match: every supplied field satisfied by one USDC Transfer in a successful tx. mismatch: tx is real but a field differs (see checks). not_settled: tx reverted. no_usdc_transfer: succeeded but moved no native USDC. not_found: no queried node has the receipt (absence of evidence, not proof)." },
+    verdict: { type: "string", enum: VERDICTS_PAY, description: "match: every supplied field satisfied by one USDC Transfer in a successful tx. mismatch: tx is real but a field differs (see checks). not_settled: tx reverted. no_usdc_transfer: succeeded but moved no native USDC. not_found: no queried node has the receipt (absence of evidence, not proof). unconfirmed: two RPC nodes disagree (block hash, status, log count) or the second lacks the receipt; primary_verdict shows what the first node alone implied." },
+    primary_verdict: { type: "string", enum: VERDICTS_PAY, description: "What the first RPC node alone implied; differs from verdict only when verdict is unconfirmed." },
     settled: { type: "boolean" }, matched: { type: "boolean" }, explanation: { type: "string" },
     matched_transfer: { type: ["object", "null"] }, matching_transfers: { type: "integer" },
     transfers: { type: "array", items: { type: "object" }, description: "Native-USDC Transfer logs in the transaction (max 25)." },

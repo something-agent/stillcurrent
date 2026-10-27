@@ -19,7 +19,7 @@ export const TOPIC_AUTH_USED = "0x98de503528ee59b575ef0c0a2576a82497bfc029a5685b
 export const MAX_TRANSFERS_LISTED = 25;
 const RPC_TIMEOUT_MS = 6000;
 
-export type PaymentVerdict = "match" | "mismatch" | "not_settled" | "not_found" | "no_usdc_transfer";
+export type PaymentVerdict = "match" | "mismatch" | "not_settled" | "not_found" | "no_usdc_transfer" | "unconfirmed";
 
 export interface PaymentRequest {
   tx_hash: string;
@@ -203,19 +203,27 @@ export async function verifyPayment(req: PaymentRequest, s: Settings, f: typeof 
 
   // Second witness: another RPC node, same receipt.
   let rpcInfo: Record<string, unknown> = { primary: hostOf(primary), witnesses: [hostOf(primary)], independent_rpc_agrees: null };
+  let witnessDisagrees = false;
   if (req.cross_check) {
     const w = await firstRpc(rpcs, [{ id: 1, method: "eth_getTransactionReceipt", params: [req.tx_hash] }], f, new Set([primary]));
     if (w) {
       const wr = w.out[1].result;
       const agrees = !!wr && wr.status === receipt.status && String(wr.blockHash).toLowerCase() === String(receipt.blockHash).toLowerCase() && Array.isArray(wr.logs) && wr.logs.length === logs.length;
       rpcInfo = { primary: hostOf(primary), witnesses: [hostOf(primary), hostOf(w.url)], independent_rpc_agrees: agrees };
-      if (!agrees) caveats.push(wr ? "A second RPC node returned a different receipt (status, block or log count); treat this verdict as unconfirmed and re-check." : "A second RPC node does not have this receipt yet (node lag or reorg); re-check before relying on it.");
+      if (!agrees) {
+        witnessDisagrees = true;
+        caveats.push(wr ? "A second RPC node returned a different receipt (status, block hash or log count): possible reorg or node fault, so the verdict is 'unconfirmed' and primary_verdict shows what the first node alone implied. Re-check in a minute." : "A second RPC node does not have this receipt yet (node lag or reorg), so the verdict is 'unconfirmed' and primary_verdict shows what the first node alone implied. Re-check in a minute.");
+      }
     } else caveats.push("No second RPC node answered, so this verdict has a single witness.");
   }
 
-  const verdict: PaymentVerdict = reverted ? "not_settled" : rows.length === 0 ? "no_usdc_transfer" : checks.every((c) => c.pass) ? "match" : "mismatch";
+  const primaryVerdict: PaymentVerdict = reverted ? "not_settled" : rows.length === 0 ? "no_usdc_transfer" : checks.every((c) => c.pass) ? "match" : "mismatch";
+  // Two witnesses that disagree (block hash, status, log count, or one lacks the receipt) never yield a confident verdict.
+  const verdict: PaymentVerdict = witnessDisagrees ? "unconfirmed" : primaryVerdict;
   const failed = checks.filter((c) => !c.pass).map((c) => c.check);
-  const explanation = verdict === "match"
+  const explanation = verdict === "unconfirmed"
+    ? `Unconfirmed: the first RPC node implies '${primaryVerdict}', but a second independent node returned a different receipt or none (possible reorg or node lag). Do not rely on either reading yet; re-check shortly.`
+    : verdict === "match"
     ? `Settled: the transaction succeeded and the chain shows a USDC Transfer of ${matched ? matched.amount_usdc : "?"} from ${matched?.from} to ${matched?.to} that satisfies every field you supplied.`
     : verdict === "not_settled" ? "The transaction was mined but reverted, so no USDC moved."
     : verdict === "no_usdc_transfer" ? "The transaction succeeded but emitted no native-USDC Transfer on Base, so it is not a USDC payment (it may be another token, a native ETH transfer, or another chain)."
@@ -225,7 +233,7 @@ export async function verifyPayment(req: PaymentRequest, s: Settings, f: typeof 
     logs: logs.map((l) => ({ address: l.address, topics: l.topics, data: l.data, logIndex: l.logIndex })) });
 
   return {
-    ...base, verdict, settled: !reverted && rows.length > 0, matched: verdict === "match", explanation,
+    ...base, verdict, primary_verdict: primaryVerdict, settled: !witnessDisagrees && !reverted && rows.length > 0, matched: verdict === "match", explanation,
     matched_transfer: matched, matching_transfers: matchedIdx.length,
     transfers, transfers_total: transfersTotal, ...(transfersTotal > transfers.length ? { transfers_truncated: true } : {}),
     checks,

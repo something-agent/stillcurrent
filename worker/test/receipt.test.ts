@@ -186,6 +186,18 @@ describe("POST /verify/payment verdicts", () => {
     const d = (await (await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE } })).json()) as any;
     expect(d.rpc.independent_rpc_agrees).toBe(false);
     expect(d.caveats.join(" ")).toMatch(/different receipt/);
+    expect(d.verdict).toBe("unconfirmed");
+    expect(d.primary_verdict).toBe("match");
+    expect(d.matched).toBe(false);
+  });
+
+  it("unknown expect key gets a free 422 naming the permitted keys and the likely one", async () => {
+    stubFetch(node("rpc-a.test", good), node("rpc-b.test", good));
+    const r = await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE, amount: "0.02" } });
+    expect(r.status).toBe(422);
+    const t = JSON.stringify(await r.json());
+    expect(t).toMatch(/Permitted keys here: payee, payer, amount_usdc/);
+    expect(t).toMatch(/Did you mean 'amount_usdc'\?/);
   });
 
   it("self-payment (payer == payee) is flagged, not hidden", async () => {
