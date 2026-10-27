@@ -49,7 +49,7 @@ function x402Routes(s: Settings) {
         body: {
           x402Version: 2,
           error: "Payment required",
-          message: `${S.SERVICE_NAME} ${path} costs $${priceUsd(r.price)} in USDC on ${s.network}. Payment requirements are in the PAYMENT-REQUIRED response header (base64-encoded JSON).`,
+          message: `${S.SERVICE_NAME} ${path} costs $${priceUsd(r.price)} in USDC on ${s.network}. Payment requirements are in the PAYMENT-REQUIRED response header (base64-encoded JSON). An empty body or {} gets this challenge (discovery probes); a non-empty invalid body gets a free 422 instead, charged: false.`,
           accepts: [{ scheme: "exact", network: s.network, asset: S.USDC_BASE, amount: atomic(r.price), payTo: s.payTo, maxTimeoutSeconds: 300, extra: { name: "USD Coin", version: "2" } }],
           docs: (s.publicBaseUrl || "") + "/",
         },

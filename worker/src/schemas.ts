@@ -1,6 +1,6 @@
 /** Static descriptions, examples and JSON schemas (mirrors the Python service). */
 export const SERVICE_NAME = "StillCurrent";
-export const VERSION = "0.4.1-worker";
+export const VERSION = "0.4.2-worker";
 export const SERVICE_DESC =
   "Pay-per-call checks that tell you whether a source is still current (link liveness and staleness, whether a quoted sentence or claim " +
   "still appears on the cited page, with archive.org fallback) and whether a claimed USDC payment on Base really settled (to the right address, for the right amount).";

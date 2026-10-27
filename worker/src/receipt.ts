@@ -160,6 +160,7 @@ export async function verifyPayment(req: PaymentRequest, s: Settings, f: typeof 
     (e.amount_atomic === null || (e.amount_match === "exact" ? amt === e.amount_atomic : amt >= e.amount_atomic));
   const matchedIdx = rows.map((t, i) => (matches(t, raw[i]) ? i : -1)).filter((i) => i >= 0);
   const matched = matchedIdx.length ? rows[matchedIdx[0]] : null;
+  if (matchedIdx.length > 1) caveats.push(`${matchedIdx.length} USDC Transfer logs in this transaction satisfy the claim; matched_transfer is the first (log ${rows[matchedIdx[0]].log_index}). The chain cannot tell which one a seller already credited: key settled payments by (tx_hash, log_index) and refuse a second claim on the same pair.`);
   const anyTo = e.payee !== null ? rows.find((t) => t.to === e.payee) ?? null : null;
   const focus = matched ?? anyTo ?? rows[0] ?? null; // transfer shown as "actual" in the checks
 

@@ -60,6 +60,13 @@ describe("free routes", () => {
 });
 
 describe("x402 payment gate", () => {
+  it("{} probe gets 402 whose body says {} is a discovery probe and invalid input is a free 422", async () => {
+    stubFetch(facilitator);
+    const r = await post("/check/url", {});
+    expect(r.status).toBe(402);
+    const b = (await r.json()) as any;
+    expect(b.message).toMatch(/\{\} gets this challenge \(discovery probes\).*free 422/);
+  });
   it.each([
     ["/check/url", "10000"],
     ["/check/citation", "20000"],

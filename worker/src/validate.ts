@@ -121,10 +121,35 @@ function timeField(obj: any, key: string, errs: ValidationError[]): number | nul
 }
 
 const PAY_ALIASES: Record<string, string> = { amount: "amount_usdc", amount_usd: "amount_usdc", value: "amount_usdc", to: "payee", from: "payer", payto: "payee", pay_to: "payee", confirmations: "min_confirmations", hash: "tx_hash", transaction: "tx_hash", txhash: "tx_hash" };
+/** Optimal-string-alignment edit distance (insert, delete, substitute, adjacent swap). */
+export function editDistance(a: string, b: string): number {
+  const d: number[][] = Array.from({ length: a.length + 1 }, (_, i) => Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)));
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+    if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+  }
+  return d[a.length][b.length];
+}
+/** Likely intended key: a curated alias for common wrong *names* (amount -> amount_usdc), else the
+ *  nearest permitted key for *typos/truncations* (edit distance <= 2, or a unique prefix of >= 4 chars). */
+export function suggestKey(k: string, allowed: Set<string>): string | null {
+  const lk = k.toLowerCase();
+  const alias = PAY_ALIASES[lk];
+  if (alias && allowed.has(alias)) return alias;
+  let best: string | null = null, bestD = Infinity, tie = false;
+  for (const a of allowed) {
+    const dist = editDistance(lk, a);
+    if (dist < bestD) { best = a; bestD = dist; tie = false; } else if (dist === bestD) tie = true;
+  }
+  if (best && bestD <= 2 && !tie) return best;
+  const pre = lk.length >= 4 ? [...allowed].filter((a) => a.startsWith(lk)) : [];
+  return pre.length === 1 ? pre[0] : null;
+}
 // An unknown key costs the caller a round trip; name the permitted keys (and the likely intended one) in the free 422.
 function extraMsg(k: string, allowed: Set<string>): string {
-  const guess = PAY_ALIASES[k.toLowerCase()];
-  return `Extra inputs are not permitted. Permitted keys here: ${[...allowed].join(", ")}` + (guess && allowed.has(guess) ? `. Did you mean '${guess}'?` : "");
+  const guess = suggestKey(k, allowed);
+  return `Extra inputs are not permitted. Permitted keys here: ${[...allowed].join(", ")}` + (guess ? `. Did you mean '${guess}'?` : "");
 }
 
 export function validatePaymentVerify(raw: unknown): { ok: true; value: PaymentRequest } | { ok: false; errors: ValidationError[] } {

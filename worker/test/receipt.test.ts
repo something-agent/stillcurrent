@@ -200,6 +200,25 @@ describe("POST /verify/payment verdicts", () => {
     expect(t).toMatch(/Did you mean 'amount_usdc'\?/);
   });
 
+  it("near-miss keys (truncation/typo) get the nearest permitted key; unrelated keys get none", async () => {
+    stubFetch(node("rpc-a.test", good), node("rpc-b.test", good));
+    const t1 = JSON.stringify(await (await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE, amount_atomi: "20000" } })).json());
+    expect(t1).toMatch(/Did you mean 'amount_atomic'\?/);
+    const t2 = JSON.stringify(await (await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE, min_confirmation: 3 } })).json());
+    expect(t2).toMatch(/Did you mean 'min_confirmations'\?/);
+    const t3 = JSON.stringify(await (await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE, zebra: 1 } })).json());
+    expect(t3).not.toMatch(/Did you mean/);
+  });
+
+  it("several logs satisfying the claim are counted and flagged (dedupe by tx_hash+log_index)", async () => {
+    const logs = [1, 2].map((i) => ({ address: USDC_BASE, topics: [TOPIC_TRANSFER, pad("0x" + "ab".repeat(20)), pad(PAYEE)], data: amt(20000n), logIndex: "0x" + i.toString(16) }));
+    const nd = { receipt: receipt({ logs }) };
+    stubFetch(node("rpc-a.test", nd), node("rpc-b.test", nd));
+    const d = (await (await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE, amount_usdc: "0.02" } })).json()) as any;
+    expect(d.matching_transfers).toBe(2);
+    expect(d.caveats.join(" ")).toMatch(/2 USDC Transfer logs.*\(tx_hash, log_index\)/);
+  });
+
   it("self-payment (payer == payee) is flagged, not hidden", async () => {
     const logs = [{ address: USDC_BASE, topics: [TOPIC_TRANSFER, pad(PAYEE), pad(PAYEE)], data: amt(100000n), logIndex: "0x1" }];
     const nd = { receipt: receipt({ logs }) };
