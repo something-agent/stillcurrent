@@ -261,7 +261,7 @@ Payment: x402 v2, scheme exact, USDC on ${s.network}, payTo ${s.payTo}. Unpaid c
 
 GET on a paid path returns the 402 challenge only (for crawlers); it never runs a check or charges. Use POST.
 
-Invalid input (bad JSON, missing or malformed fields) gets a free HTTP 422 with "charged": false, before any payment challenge.
+Invalid input (bad JSON, missing or malformed fields) gets a free HTTP 422 with "charged": false, before any payment challenge. One deliberate exception: an empty body or {} gets the 402 challenge, because directory crawlers probe with exactly that. For an unknown key the 422 names the likely intended key and the rule that chose it (alias, edit_distance or prefix); a tie gets no guess.
 
 Note: send a named User-Agent header (e.g. "my-agent/1.0"). The workers.dev edge blocks some default library User-Agents (such as Python-urllib) with a Cloudflare 403 (error 1010) before the request reaches this service; that 403 does not mean the service is down.
 

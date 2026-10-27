@@ -133,23 +133,25 @@ export function editDistance(a: string, b: string): number {
 }
 /** Likely intended key: a curated alias for common wrong *names* (amount -> amount_usdc), else the
  *  nearest permitted key for *typos/truncations* (edit distance <= 2, or a unique prefix of >= 4 chars). */
-export function suggestKey(k: string, allowed: Set<string>): string | null {
+export function suggestKey(k: string, allowed: Set<string>): string | null { return suggestKeyRule(k, allowed)?.key ?? null; }
+/** Same as suggestKey, plus which rule fired (alias | edit_distance | prefix), so the choice is visible from outside. */
+export function suggestKeyRule(k: string, allowed: Set<string>): { key: string; rule: "alias" | "edit_distance" | "prefix" } | null {
   const lk = k.toLowerCase();
   const alias = PAY_ALIASES[lk];
-  if (alias && allowed.has(alias)) return alias;
+  if (alias && allowed.has(alias)) return { key: alias, rule: "alias" };
   let best: string | null = null, bestD = Infinity, tie = false;
   for (const a of allowed) {
     const dist = editDistance(lk, a);
     if (dist < bestD) { best = a; bestD = dist; tie = false; } else if (dist === bestD) tie = true;
   }
-  if (best && bestD <= 2 && !tie) return best;
+  if (best && bestD <= 2 && !tie) return { key: best, rule: "edit_distance" };
   const pre = lk.length >= 4 ? [...allowed].filter((a) => a.startsWith(lk)) : [];
-  return pre.length === 1 ? pre[0] : null;
+  return pre.length === 1 ? { key: pre[0], rule: "prefix" } : null;
 }
 // An unknown key costs the caller a round trip; name the permitted keys (and the likely intended one) in the free 422.
 function extraMsg(k: string, allowed: Set<string>): string {
-  const guess = suggestKey(k, allowed);
-  return `Extra inputs are not permitted. Permitted keys here: ${[...allowed].join(", ")}` + (guess ? `. Did you mean '${guess}'?` : "");
+  const g = suggestKeyRule(k, allowed);
+  return `Extra inputs are not permitted. Permitted keys here: ${[...allowed].join(", ")}` + (g ? `. Did you mean '${g.key}'? (rule: ${g.rule})` : "");
 }
 
 export function validatePaymentVerify(raw: unknown): { ok: true; value: PaymentRequest } | { ok: false; errors: ValidationError[] } {

@@ -210,6 +210,16 @@ describe("POST /verify/payment verdicts", () => {
     expect(t3).not.toMatch(/Did you mean/);
   });
 
+  it("names the rule that chose the suggestion, so the distance rule is observable behind the aliases (gigawatt)", async () => {
+    stubFetch(node("rpc-a.test", good), node("rpc-b.test", good));
+    const j = async (e: any) => JSON.stringify(await (await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE, ...e } })).json());
+    expect(await j({ amount: "0.02" })).toMatch(/Did you mean 'amount_usdc'\? \(rule: alias\)/);
+    expect(await j({ amount_atomi: "20000" })).toMatch(/Did you mean 'amount_atomic'\? \(rule: edit_distance\)/);
+    expect(await j({ amount_usdcc: "0.02" })).toMatch(/Did you mean 'amount_usdc'\? \(rule: edit_distance\)/);
+    expect(await j({ min_conf: 3 })).toMatch(/Did you mean 'min_confirmations'\? \(rule: prefix\)/);
+    expect(await j({ paye: PAYEE })).not.toMatch(/Did you mean/);
+  });
+
   it("several logs satisfying the claim are counted and flagged (dedupe by tx_hash+log_index)", async () => {
     const logs = [1, 2].map((i) => ({ address: USDC_BASE, topics: [TOPIC_TRANSFER, pad("0x" + "ab".repeat(20)), pad(PAYEE)], data: amt(20000n), logIndex: "0x" + i.toString(16) }));
     const nd = { receipt: receipt({ logs }) };
