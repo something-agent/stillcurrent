@@ -1,9 +1,9 @@
 /** Static descriptions, examples and JSON schemas (mirrors the Python service). */
 export const SERVICE_NAME = "StillCurrent";
-export const VERSION = "0.3.0-worker";
+export const VERSION = "0.4.0-worker";
 export const SERVICE_DESC =
-  "Pay-per-call checks that tell you whether a source is still current: link liveness and staleness, " +
-  "and whether a quoted sentence or claim still appears on the cited page (with archive.org fallback).";
+  "Pay-per-call checks that tell you whether a source is still current (link liveness and staleness, whether a quoted sentence or claim " +
+  "still appears on the cited page, with archive.org fallback) and whether a claimed USDC payment on Base really settled (to the right address, for the right amount).";
 export const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base mainnet (eip155:8453)
 
 export const URL_INPUT_EXAMPLE = { url: "https://www.cdc.gov/nchs/fastats/life-expectancy.htm", stale_after_days: 365 };
@@ -149,3 +149,81 @@ export const BATCH_DESCRIPTION =
   "/check/url: no archive.org lookup or last-updated date. Use it to find which links in a document need a full check.";
 if (BATCH_DESCRIPTION.length > 500) throw new Error("description too long");
 if (URL_DESCRIPTION.length > 500 || CIT_DESCRIPTION.length > 500) throw new Error("description too long");
+
+// ---------------------------------------------------------------- POST /verify/payment
+export const PAY_INPUT_EXAMPLE = {
+  tx_hash: "0x2d3fd6ac0f26fb81d8763c0a4dc723a3e209a9a5da12946cdc6c20dd587666c1",
+  expect: { payee: "0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700", amount_usdc: "0.10", min_confirmations: 12, x402: true },
+};
+export const VERDICTS_PAY = ["match", "mismatch", "not_settled", "not_found", "no_usdc_transfer"];
+export const PAY_INPUT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    tx_hash: { type: "string", pattern: "^0x[0-9a-fA-F]{64}$", description: "Base mainnet transaction hash of the claimed payment. Give this or payment_response.", title: "Tx Hash" },
+    payment_response: { type: "string", maxLength: 8192, description: "Alternative to tx_hash: the base64 PAYMENT-RESPONSE (or X-PAYMENT-RESPONSE) header a seller returned after an x402 settlement. The transaction hash (and payer, if named) are taken from it.", title: "Payment Response" },
+    network: { type: "string", enum: ["eip155:8453", "base"], default: "eip155:8453", description: "Only Base mainnet is supported.", title: "Network" },
+    expect: {
+      type: "object", additionalProperties: false,
+      description: "The claim to check. Give at least one of payee, payer, amount_usdc, amount_atomic. Every field you give must be satisfied by one single USDC Transfer in the transaction.",
+      properties: {
+        payee: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$", description: "Address that should have received the USDC." },
+        payer: { type: "string", pattern: "^0x[0-9a-fA-F]{40}$", description: "Address that should have sent the USDC." },
+        amount_usdc: { type: "string", description: "Decimal USDC amount with at most 6 decimals, e.g. \"0.02\". A JSON number is accepted too." },
+        amount_atomic: { type: "string", description: "Same amount in USDC base units (6 decimals), e.g. \"20000\". If both are given they must agree." },
+        amount_match: { type: "string", enum: ["exact", "at_least"], default: "exact" },
+        min_confirmations: { type: "integer", minimum: 0, maximum: 1000000, description: "Require at least this many blocks on top (inclusive of the block itself). Base blocks are about 2 s apart." },
+        not_before: { type: "string", description: "ISO-8601 time or unix seconds: the block must be at or after this." },
+        not_after: { type: "string", description: "ISO-8601 time or unix seconds: the block must be at or before this." },
+        x402: { type: "boolean", description: "true: require the EIP-3009 AuthorizationUsed pattern an x402 'exact' payment leaves; false: require its absence." },
+      },
+    },
+    cross_check: { type: "boolean", default: true, description: "Ask a second, independent RPC node for the same receipt and report whether it agrees." },
+  },
+  required: ["expect"],
+};
+export const PAY_OUTPUT_EXAMPLE_FULL: any = {
+  network: "eip155:8453", asset: "USDC", asset_address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+  tx_hash: "0x2d3fd6ac0f26fb81d8763c0a4dc723a3e209a9a5da12946cdc6c20dd587666c1",
+  verdict: "match", settled: true, matched: true,
+  explanation: "Settled: the transaction succeeded and the chain shows a USDC Transfer of 0.10 from 0x33190c9d2662f94a19ce88ea666f0ff8cede3700 to 0x33190c9d2662f94a19ce88ea666f0ff8cede3700 that satisfies every field you supplied.",
+  matched_transfer: { log_index: 637, from: "0x33190c9d2662f94a19ce88ea666f0ff8cede3700", to: "0x33190c9d2662f94a19ce88ea666f0ff8cede3700", amount_atomic: "100000", amount_usdc: "0.10" },
+  matching_transfers: 1,
+  checks: [
+    { check: "tx_succeeded", expected: "success", actual: "success", pass: true },
+    { check: "payee_received_usdc", expected: "0x33190c9d2662f94a19ce88ea666f0ff8cede3700", actual: "0x33190c9d2662f94a19ce88ea666f0ff8cede3700", pass: true },
+    { check: "amount_exact", expected: "0.10", actual: "0.10", pass: true },
+    { check: "min_confirmations", expected: 12, actual: 20848, pass: true },
+    { check: "x402_exact_pattern", expected: true, actual: true, pass: true },
+  ],
+  finality: { block_number: 53118178, block_hash: "0x7b86fa1f816605dfd8a0fb11cf53c39e9177fd091cc88922027d66eb45271207", block_time: "2026-10-26T14:41:43.000Z", confirmations: 20848, finalized_block: 53138470, is_l1_finalized: true },
+  x402: { eip3009_authorization_used: true, authorizer: "0x33190c9d2662f94a19ce88ea666f0ff8cede3700", submitted_by: "0xc6699d2aada6c36dfea5c248dd70f9cb0235cb63", submitted_to_usdc_contract: false, pattern: "eip3009_via_other_contract" },
+  counterparty: { payer: "0x33190c9d2662f94a19ce88ea666f0ff8cede3700", payee: "0x33190c9d2662f94a19ce88ea666f0ff8cede3700", self_payment: true,
+    note: "self_payment=true means payer and payee are the same address: the transfer is real but is not outside demand." },
+  rpc: { primary: "mainnet.base.org", witnesses: ["mainnet.base.org", "base-rpc.publicnode.com"], independent_rpc_agrees: true },
+  evidence: { receipt_sha256: "285677f045c5c4dcc33058f3f730d1fc3d770e130f39430745affeac5d8c2089", rpc_methods: ["eth_getTransactionReceipt", "eth_getTransactionByHash", "eth_getBlockByNumber", "eth_blockNumber"] },
+  caveats: [], limits: ["Reads Base mainnet state through public RPC nodes. A match shows the chain has that USDC Transfer; it does not show who controls either address, that anything was delivered, or where the payer's funds came from."],
+  checked_at: "2026-10-27T02:16:38Z", took_ms: 173,
+};
+export const PAY_OUTPUT_EXAMPLE = { verdict: "match", settled: true, matched: true, matched_transfer: PAY_OUTPUT_EXAMPLE_FULL.matched_transfer,
+  finality: { confirmations: 20848, is_l1_finalized: true }, counterparty: { self_payment: true }, checked_at: "2026-10-27T02:16:38Z", took_ms: 173 };
+export const PAY_OUTPUT_SCHEMA = {
+  type: "object",
+  properties: {
+    verdict: { type: "string", enum: VERDICTS_PAY, description: "match: every supplied field satisfied by one USDC Transfer in a successful tx. mismatch: tx is real but a field differs (see checks). not_settled: tx reverted. no_usdc_transfer: succeeded but moved no native USDC. not_found: no queried node has the receipt (absence of evidence, not proof)." },
+    settled: { type: "boolean" }, matched: { type: "boolean" }, explanation: { type: "string" },
+    matched_transfer: { type: ["object", "null"] }, matching_transfers: { type: "integer" },
+    transfers: { type: "array", items: { type: "object" }, description: "Native-USDC Transfer logs in the transaction (max 25)." },
+    checks: { type: "array", items: { type: "object", properties: { check: { type: "string" }, expected: {}, actual: {}, pass: { type: "boolean" } } } },
+    finality: { type: "object" }, x402: { type: "object" }, counterparty: { type: ["object", "null"] }, rpc: { type: "object" }, evidence: { type: "object" },
+    caveats: { type: "array", items: { type: "string" } }, limits: { type: "array", items: { type: "string" } },
+    checked_at: { type: "string", format: "date-time", description: "UTC time the chain was read. Finality and confirmations are as of this time." },
+    took_ms: { type: "integer" },
+  },
+  required: ["verdict", "checked_at"],
+};
+export const PAY_DESCRIPTION =
+  "Verify a claimed USDC payment on Base: given a tx hash (or an x402 PAYMENT-RESPONSE header) and what you expect (payee, payer, amount, time window, " +
+  "confirmations), reads the chain and returns match / mismatch / not_settled / not_found with per-field checks, finality, the x402 EIP-3009 pattern, " +
+  "a self-payment flag and a second-RPC cross-check. Cannot show who owns an address or that a service was delivered.";
+if (PAY_DESCRIPTION.length > 500) throw new Error("description too long");

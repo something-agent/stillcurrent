@@ -222,7 +222,7 @@ describe("v0.3: GET probes, batch endpoint, discovery", () => {
     expect(o.paths["/check/urls"].post["x-payment-info"].price.amount).toBe("0.10");
     const w = (await (await call("/.well-known/x402", {}, { OWNERSHIP_PROOFS: sig })).json()) as any;
     expect(w.ownershipProofs).toEqual([sig]);
-    expect(w.resources).toHaveLength(3);
+    expect(w.resources).toHaveLength(4);
     const a = (await (await call("/.well-known/agent-registration.json", {}, { ERC8004_AGENT_ID: "42" })).json()) as any;
     expect(a.type).toBe("https://eips.ethereum.org/EIPS/eip-8004#registration-v1");
     expect(a.registrations[0]).toEqual({ agentId: 42, agentRegistry: "eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" });

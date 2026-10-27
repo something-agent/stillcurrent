@@ -88,3 +88,117 @@ export function validateUrlsCheck(raw: unknown, maxUrls = 25): { ok: true; value
   });
   return errs.length ? { ok: false, errors: errs } : { ok: true, value: { urls } };
 }
+
+// ------------------------------------------------------------------ POST /verify/payment
+import type { PaymentRequest } from "./receipt";
+const ADDR = /^0x[0-9a-fA-F]{40}$/;
+const HASH = /^0x[0-9a-fA-F]{64}$/;
+
+function addrField(obj: any, key: string, loc: (string | number)[], errs: ValidationError[]): string | null {
+  const v = obj?.[key];
+  if (v === undefined || v === null) return null;
+  if (typeof v !== "string") { errs.push({ loc: [...loc, key], msg: "Input should be a valid string", type: "string_type" }); return null; }
+  if (!ADDR.test(v.trim())) { errs.push({ loc: [...loc, key], msg: "Value error, must be a 0x-prefixed 20-byte hex address", type: "value_error" }); return null; }
+  return v.trim().toLowerCase();
+}
+
+/** "0.02" (string) or a JSON number with at most 6 decimals -> atomic USDC units. */
+export function parseUsdcAmount(v: unknown): bigint | null {
+  const str = typeof v === "number" ? (Number.isFinite(v) ? String(v) : "") : typeof v === "string" ? v.trim() : "";
+  if (!/^\d{1,12}(\.\d{1,6})?$/.test(str)) return null;
+  const [w, f = ""] = str.split(".");
+  return BigInt(w) * 1_000_000n + BigInt(f.padEnd(6, "0"));
+}
+
+function timeField(obj: any, key: string, errs: ValidationError[]): number | null {
+  const v = obj?.[key];
+  if (v === undefined || v === null) return null;
+  let t: number | null = null;
+  if (typeof v === "number" && Number.isInteger(v) && v > 1_400_000_000 && v < 4_000_000_000) t = v;
+  else if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v)) { const ms = Date.parse(v); if (Number.isFinite(ms)) t = Math.floor(ms / 1000); }
+  if (t === null) errs.push({ loc: ["body", "expect", key], msg: "Value error, use an ISO-8601 time (e.g. 2026-10-26T15:00:00Z) or unix seconds", type: "value_error" });
+  return t;
+}
+
+export function validatePaymentVerify(raw: unknown): { ok: true; value: PaymentRequest } | { ok: false; errors: ValidationError[] } {
+  const errs: ValidationError[] = [];
+  const body = asObject(raw, errs);
+  if (!body) return { ok: false, errors: errs };
+  const allowed = new Set(["tx_hash", "payment_response", "network", "expect", "cross_check"]);
+  for (const k of Object.keys(body)) if (!allowed.has(k)) errs.push({ loc: ["body", k], msg: "Extra inputs are not permitted", type: "extra_forbidden" });
+
+  let txHash: string | null = null;
+  const th = body.tx_hash;
+  if (th !== undefined && th !== null) {
+    if (typeof th !== "string") errs.push({ loc: ["body", "tx_hash"], msg: "Input should be a valid string", type: "string_type" });
+    else if (!HASH.test(th.trim())) errs.push({ loc: ["body", "tx_hash"], msg: "Value error, must be a 0x-prefixed 32-byte hex transaction hash", type: "value_error" });
+    else txHash = th.trim().toLowerCase();
+  }
+  let claimedPayer: string | null = null;
+  const pr = body.payment_response;
+  if (pr !== undefined && pr !== null) {
+    if (typeof pr !== "string" || pr.length > 8192) errs.push({ loc: ["body", "payment_response"], msg: "Input should be a base64 string of at most 8192 characters", type: "string_type" });
+    else {
+      let d: any = null;
+      try { d = JSON.parse(atob(pr.trim().replace(/-/g, "+").replace(/_/g, "/"))); } catch { /* handled below */ }
+      const t = d && typeof d === "object" ? d.transaction : null;
+      if (typeof t !== "string" || !HASH.test(t)) errs.push({ loc: ["body", "payment_response"], msg: "Value error, not a base64 PAYMENT-RESPONSE header with a 'transaction' hash", type: "value_error" });
+      else if (d.network !== undefined && d.network !== "eip155:8453" && d.network !== "base") errs.push({ loc: ["body", "payment_response"], msg: "Value error, network in the header is not Base mainnet (eip155:8453)", type: "value_error" });
+      else if (d.success === false) errs.push({ loc: ["body", "payment_response"], msg: "Value error, header reports success=false (no settlement to verify)", type: "value_error" });
+      else {
+        if (txHash !== null && txHash !== t.toLowerCase()) errs.push({ loc: ["body"], msg: "Value error, tx_hash and payment_response name different transactions", type: "value_error" });
+        txHash = t.toLowerCase();
+        if (typeof d.payer === "string" && ADDR.test(d.payer)) claimedPayer = d.payer.toLowerCase();
+      }
+    }
+  }
+  if (txHash === null && !errs.length) errs.push({ loc: ["body"], msg: "Value error, provide 'tx_hash' (or a 'payment_response' header value)", type: "value_error" });
+
+  const net = body.network;
+  if (net !== undefined && net !== null && net !== "eip155:8453" && net !== "base") errs.push({ loc: ["body", "network"], msg: "Value error, only Base mainnet is supported: 'eip155:8453' (or 'base')", type: "value_error" });
+
+  const ex = body.expect;
+  if (ex === undefined || ex === null) errs.push({ loc: ["body", "expect"], msg: "Field required", type: "missing" });
+  else if (typeof ex !== "object" || Array.isArray(ex)) errs.push({ loc: ["body", "expect"], msg: "Input should be a valid dictionary or object", type: "model_attributes_type" });
+  const e: any = ex && typeof ex === "object" && !Array.isArray(ex) ? ex : {};
+  const eAllowed = new Set(["payee", "payer", "amount_usdc", "amount_atomic", "amount_match", "min_confirmations", "not_before", "not_after", "x402"]);
+  for (const k of Object.keys(e)) if (!eAllowed.has(k)) errs.push({ loc: ["body", "expect", k], msg: "Extra inputs are not permitted", type: "extra_forbidden" });
+  const payee = addrField(e, "payee", ["body", "expect"], errs);
+  const payer = addrField(e, "payer", ["body", "expect"], errs);
+  let amount: bigint | null = null;
+  if (e.amount_usdc !== undefined && e.amount_usdc !== null) {
+    amount = parseUsdcAmount(e.amount_usdc);
+    if (amount === null) errs.push({ loc: ["body", "expect", "amount_usdc"], msg: "Value error, use a decimal USDC amount with at most 6 decimals, e.g. \"0.02\"", type: "value_error" });
+  }
+  if (e.amount_atomic !== undefined && e.amount_atomic !== null) {
+    const a = e.amount_atomic;
+    const s = typeof a === "number" && Number.isSafeInteger(a) && a >= 0 ? String(a) : typeof a === "string" ? a.trim() : "";
+    if (!/^\d{1,18}$/.test(s)) errs.push({ loc: ["body", "expect", "amount_atomic"], msg: "Value error, use a non-negative integer of USDC base units (6 decimals), e.g. \"20000\"", type: "value_error" });
+    else {
+      if (amount !== null && amount !== BigInt(s)) errs.push({ loc: ["body", "expect"], msg: "Value error, amount_usdc and amount_atomic disagree", type: "value_error" });
+      amount = BigInt(s);
+    }
+  }
+  const am = e.amount_match;
+  if (am !== undefined && am !== null && am !== "exact" && am !== "at_least") errs.push({ loc: ["body", "expect", "amount_match"], msg: "Input should be 'exact' or 'at_least'", type: "enum" });
+  let minConf: number | null = null;
+  if (e.min_confirmations !== undefined && e.min_confirmations !== null) {
+    const c = e.min_confirmations;
+    if (typeof c !== "number" || !Number.isInteger(c) || c < 0 || c > 1_000_000) errs.push({ loc: ["body", "expect", "min_confirmations"], msg: "Input should be an integer between 0 and 1000000", type: "int_type" });
+    else minConf = c;
+  }
+  const notBefore = timeField(e, "not_before", errs);
+  const notAfter = timeField(e, "not_after", errs);
+  if (notBefore !== null && notAfter !== null && notBefore > notAfter) errs.push({ loc: ["body", "expect"], msg: "Value error, not_before is after not_after", type: "value_error" });
+  let x402: boolean | null = null;
+  if (e.x402 !== undefined && e.x402 !== null) { if (typeof e.x402 !== "boolean") errs.push({ loc: ["body", "expect", "x402"], msg: "Input should be a valid boolean", type: "bool_type" }); else x402 = e.x402; }
+  if (ex && typeof ex === "object" && !errs.length && payee === null && payer === null && amount === null)
+    errs.push({ loc: ["body", "expect"], msg: "Value error, give at least one of payee, payer, amount_usdc or amount_atomic to check", type: "value_error" });
+  let cross = true;
+  if (body.cross_check !== undefined && body.cross_check !== null) { if (typeof body.cross_check !== "boolean") errs.push({ loc: ["body", "cross_check"], msg: "Input should be a valid boolean", type: "bool_type" }); else cross = body.cross_check; }
+
+  if (errs.length) return { ok: false, errors: errs };
+  return { ok: true, value: { tx_hash: txHash!, claimed_payer: claimedPayer,
+    expect: { payee, payer, amount_atomic: amount, amount_match: am === "at_least" ? "at_least" : "exact", min_confirmations: minConf, not_before: notBefore, not_after: notAfter, x402 },
+    cross_check: cross } };
+}

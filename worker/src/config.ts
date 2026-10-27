@@ -6,6 +6,8 @@ export interface Env {
   PRICE_URL_CHECK?: string;
   PRICE_CITATION_CHECK?: string;
   PRICE_URL_BATCH?: string;
+  PRICE_PAYMENT_VERIFY?: string;
+  RPC_URLS?: string;
   OWNERSHIP_PROOFS?: string;
   ERC8004_AGENT_ID?: string;
   PUBLIC_BASE_URL?: string;
@@ -24,6 +26,8 @@ export interface Settings {
   priceUrlCheck: string;
   priceCitationCheck: string;
   priceUrlBatch: string;
+  pricePaymentVerify: string;
+  rpcUrls: string[];
   ownershipProofs: string[];
   erc8004AgentId: number | null;
   publicBaseUrl: string | null;
@@ -57,6 +61,8 @@ export function loadSettings(env: Env = {}): Settings {
     priceUrlCheck: env.PRICE_URL_CHECK || "$0.01",
     priceCitationCheck: env.PRICE_CITATION_CHECK || "$0.02",
     priceUrlBatch: env.PRICE_URL_BATCH || "$0.10",
+    pricePaymentVerify: env.PRICE_PAYMENT_VERIFY || "$0.02",
+    rpcUrls: (env.RPC_URLS || "https://mainnet.base.org,https://base-rpc.publicnode.com,https://1rpc.io/base").split(",").map((x) => x.trim()).filter((x) => /^https:\/\//.test(x)),
     ownershipProofs: (env.OWNERSHIP_PROOFS || "").split(",").map((x) => x.trim()).filter((x) => /^0x[0-9a-fA-F]{130}$/.test(x)),
     erc8004AgentId: env.ERC8004_AGENT_ID && /^\d+$/.test(env.ERC8004_AGENT_ID.trim()) ? Number(env.ERC8004_AGENT_ID.trim()) : null,
     publicBaseUrl,

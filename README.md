@@ -15,6 +15,7 @@ The service never holds a private key, never signs, never sends funds. It only a
 | `POST /check/url` | $0.01 | Is this link alive and current? Status and redirect chain; soft-404, parked-domain, redirect-to-homepage, WAF/bot-wall and cross-domain-redirect detection; last-updated date (meta/JSON-LD/`<time>`/visible "Last updated/reviewed" text/PDF metadata/Last-Modified) with source and confidence; latest archive.org snapshot (any status and latest HTTP-200); verdict, evidence, and a recommended action. |
 | `POST /check/citation` | $0.02 | Does the quoted text or claim still appear on the cited page (HTML, PDF, text)? Quote matching runs exact, then punctuation/case-insensitive, then fuzzy (score, snippet, matched text). Claims are checked lexically: key terms plus **every number** must appear, and the best passage is returned. If the text is not on the live page, it is compared against the latest archive.org snapshot (`only_in_archive` = the source changed). The response also includes the full URL check. |
 | `POST /check/urls` | $0.10 | Batch link triage for up to 25 URLs: status, redirect chain (max 4 hops), page title and a verdict per URL (`live`, `redirected`, `redirected_cross_domain`, `moved_to_homepage`, `dead`, `blocked`, `server_error`, `unreachable`, ...). Lighter than `/check/url` (no archive.org lookup or dates) so it fits the Workers free-plan request budget; `complete: false` marks a URL whose redirects could not all be followed. |
+| `POST /verify/payment` | $0.02 | Did a claimed USDC payment on Base really settle? Give `tx_hash` (or the base64 `PAYMENT-RESPONSE` header an x402 seller returned) plus what you expect: `payee`, `payer`, `amount_usdc`/`amount_atomic` (`exact` or `at_least`), `min_confirmations`, `not_before`/`not_after`, `x402`. Every field you give must be satisfied by **one** native-USDC `Transfer` log in a successful transaction (fields matched by different transfers are a `mismatch`). Returns `match`, `mismatch`, `not_settled` (reverted), `no_usdc_transfer` or `not_found`, per-field `checks` (expected vs actual), all USDC transfers in the tx, finality (block, confirmations, L1-finalized), the EIP-3009 `AuthorizationUsed` pattern an x402 payment leaves (and who submitted it), a `self_payment` flag (payer == payee is real money movement but not outside demand), a second-RPC cross-check, and a sha256 of the receipt. **Worker only.** |
 
 Site adapters: **Wikipedia** goes through the official MediaWiki APIs and returns the last revision timestamp and a permanent `oldid` link. **legislation.gov.uk** returns factual editorial metadata: revised-text date and the count/types of outstanding unapplied effects. This is *not* a legal in-force verdict. A general law-in-force endpoint was left out on purpose because it could not be made reliable without per-provision parsing.
 
@@ -28,11 +29,19 @@ Free routes: `GET /` (service JSON), `GET /.well-known/x402` (x402scan v1 fan-ou
   crawlers probing with empty bodies get 402, not 422.
 * Settlement happens only when the handler returns < 400. Invalid input (422) is not charged. A dead, blocked, or unreachable *target*
   is still a successful check (200) and is charged.
-* Amounts: `/check/url` = `10000`, `/check/citation` = `20000`, `/check/urls` = `100000` (USDC atomic units, 6 dp). Asset `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`.
+* Amounts: `/check/url` = `10000`, `/check/citation` = `20000`, `/check/urls` = `100000`, `/verify/payment` = `20000` (USDC atomic units, 6 dp). Asset `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`.
 * PayAI fee: the facilitator charges the *seller* in credits. Base `exact` is about 2.09 credits ($0.0021) per settlement (live rate
   `GET https://facilitator.payai.network/pricing`). The 1,000 free credits per payTo therefore cover about 480 Base settlements, not 1,000.
   After that the operator prepays ($1 = 1,000 credits) and sets `PAYAI_API_KEY_ID/SECRET`. Check
   the balance status: `curl "https://facilitator.payai.network/free-credits?payTo=<addr>&network=eip155:8453"`.
+
+## What `/verify/payment` can and cannot tell you
+* It reads Base mainnet through public JSON-RPC nodes (default: mainnet.base.org, base-rpc.publicnode.com, 1rpc.io/base; override with `RPC_URLS`). Typically 3 RPC subrequests: receipt+tx, block time/head/finalized block, and a second node's receipt as a cross-check. No API key, no indexer.
+* A `match` means: the transaction succeeded and the chain shows a native-USDC (`0x8335...2913`) `Transfer` with the fields you supplied. It does **not** show who controls either address, that goods or services were delivered, or where the payer's funds came from. Lookalike tokens at other contract addresses are ignored.
+* `not_found` is a charged, valid result meaning no queried node had the receipt (pending, other chain, typo, or never sent). It is not proof of absence. If no RPC node can be reached at all the route returns `503` with `charged: false`.
+* Finality: `confirmations` counts blocks on top (inclusive); `is_l1_finalized` compares with the node's `finalized` block. Under a few minutes old, treat as soft-confirmed.
+* The x402 pattern is detected from the EIP-3009 `AuthorizationUsed` log whose authorizer is the sender of the checked transfer. PayAI submits through Multicall3, so `submitted_to_usdc_contract` is often `false`; `submitted_by` is the facilitator, not the payer.
+* Not assessed: payer/payee relatedness beyond `payer == payee` (funding source, shared operator), sanctions, token other than USDC, chains other than Base.
 
 ## Safety
 * SSRF guard: http/https only, no URL credentials, every redirect hop resolved and refused if any address is non-public
