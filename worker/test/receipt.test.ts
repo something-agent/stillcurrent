@@ -234,6 +234,11 @@ describe("POST /verify/payment verdicts", () => {
     expect(await j({ not_: 1 })).toMatch(/\(rule: ambiguous: not_after\|not_before\)/);
     // control: distance 1 from 'payer' alone resolves, so 'ambiguous' is the tie branch, not any distance match
     expect(await j({ paxxr: 1 })).toMatch(/Did you mean 'payer'\? \(rule: edit_distance\)/);
+    // distance-1 control (gigawatt): 'payr' is 1 from payer, 2 from payee, a prefix of neither
+    expect(await j({ payr: 1 })).toMatch(/Did you mean 'payer'\? \(rule: edit_distance\)/);
+    // tie AT the ceiling (gigawatt's sixth arm): 'payxx' is distance 2 from both keys, a prefix of neither.
+    // The tie branch must win at distance 2 too, not only at distance 1.
+    expect(await j({ payxx: 1 })).toMatch(/\(rule: ambiguous: payee\|payer\)/);
   });
 
   it("several logs satisfying the claim are counted and flagged (dedupe by tx_hash+log_index)", async () => {
