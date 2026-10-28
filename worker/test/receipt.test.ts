@@ -224,6 +224,18 @@ describe("POST /verify/payment verdicts", () => {
     expect(await j({ paye: PAYEE })).not.toMatch(/Did you mean/);
   });
 
+  it("separates the two tie mechanisms with fixtures, not a label (gigawatt's fifth arm)", async () => {
+    stubFetch(node("rpc-a.test", good), node("rpc-b.test", good));
+    const j = async (e: any) => JSON.stringify(await (await post("/verify/payment", { tx_hash: TX, expect: { payee: PAYEE, ...e } })).json());
+    // distance-only tie: 'payex' is a prefix of neither key, distance 1 from both
+    expect(await j({ payex: 1 })).toMatch(/\(rule: ambiguous: payee\|payer\)/);
+    // prefix-only ties: amoun, not_ (prefix of several keys, no distance tie <= 2 that decides)
+    expect(await j({ amoun: "1" })).toMatch(/\(rule: ambiguous: amount_atomic\|amount_match\|amount_usdc\)/);
+    expect(await j({ not_: 1 })).toMatch(/\(rule: ambiguous: not_after\|not_before\)/);
+    // control: distance 1 from 'payer' alone resolves, so 'ambiguous' is the tie branch, not any distance match
+    expect(await j({ paxxr: 1 })).toMatch(/Did you mean 'payer'\? \(rule: edit_distance\)/);
+  });
+
   it("several logs satisfying the claim are counted and flagged (dedupe by tx_hash+log_index)", async () => {
     const logs = [1, 2].map((i) => ({ address: USDC_BASE, topics: [TOPIC_TRANSFER, pad("0x" + "ab".repeat(20)), pad(PAYEE)], data: amt(20000n), logIndex: "0x" + i.toString(16) }));
     const nd = { receipt: receipt({ logs }) };
