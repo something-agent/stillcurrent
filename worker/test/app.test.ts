@@ -167,6 +167,18 @@ describe("v0.3: GET probes, batch endpoint, discovery", () => {
     const pr = decode(r.headers.get("PAYMENT-REQUIRED"));
     expect(pr.accepts[0].payTo).toBe("0x33190c9D2662F94A19CE88EA666f0ff8CeDe3700");
   });
+  it.each(["/check/url", "/check/citation", "/check/urls", "/verify/payment"])("X133 regression: unpaid GET %s returns the same challenge as POST, bazaar extension included (method POST)", async (path) => {
+    const calls = stubFetch(facilitator);
+    const g = await call(path);
+    const p = await post(path, {});
+    expect(g.status).toBe(402); expect(p.status).toBe(402);
+    const gp = decode(g.headers.get("PAYMENT-REQUIRED")), pp = decode(p.headers.get("PAYMENT-REQUIRED"));
+    expect(gp).toEqual(pp);
+    expect(gp.extensions?.bazaar?.info?.input?.method).toBe("POST");
+    expect(gp.extensions.bazaar.schema.properties.input.properties.method.enum).toEqual(["POST"]);
+    expect(g.headers.get("cache-control")).toBe(p.headers.get("cache-control"));
+    expect(calls.filter((c) => /verify|settle/.test(c))).toEqual([]);
+  });
   it("GET carrying a payment is refused free (405), never verified or settled", async () => {
     const calls = stubFetch(facilitator);
     const r = await call("/check/url", { method: "GET", headers: { "PAYMENT-SIGNATURE": btoa("{}") } });

@@ -1,6 +1,6 @@
 {
   "name": "stillcurrent-worker",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "StillCurrent x402 pay-per-call URL freshness and citation checks on Cloudflare Workers",
   "scripts": {
     "dev": "wrangler dev",

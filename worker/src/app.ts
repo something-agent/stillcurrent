@@ -62,11 +62,9 @@ function x402Routes(s: Settings) {
       }),
     };
     routes[`POST ${path}`] = cfg;
-    // Unpaid GET probes (e.g. directory crawlers) get the same 402 challenge. A GET that carries a payment
-    // is refused with a free 405 before the gate (see below), so a GET is never settled.
-    // No Bazaar extension on GET: its schema allows only body methods, and GET is never settled or cataloged.
-    const { extensions: _ext, ...getCfg } = cfg;
-    routes[`GET ${path}`] = getCfg;
+    // No GET route config: an unpaid GET is answered with the POST challenge itself (see the pre-gate
+    // middleware), so crawlers that probe with GET see the same accepts[] and the same bazaar extension,
+    // which declares method POST. (A GET route config would get the extension rewritten to method GET.)
   }
   return routes;
 }
@@ -102,6 +100,15 @@ export function buildApp(s: Settings): Hono {
     // an empty object `{}` still gets the 402 challenge (discovery probes send those).
     app.use("/:group{check|verify}/*", async (c, next) => {
       if (c.req.method === "GET" && (c.req.header("payment-signature") || c.req.header("x-payment"))) return usePost(c);
+      if (c.req.method === "GET" && Object.prototype.hasOwnProperty.call(PAID, new URL(c.req.url).pathname.replace(/\/+$/, ""))) {
+        // Unpaid GET probe (x402dash, PayAI health probes, crawlers): serve exactly the challenge an unpaid
+        // POST {} gets, in-process (no subrequest). Same payTo/amount, same bazaar extension (method POST).
+        // Nothing runs and nothing can settle: the inner request carries no payment and an empty body.
+        const h = new Headers(c.req.raw.headers);
+        h.set("content-type", "application/json"); h.delete("content-length");
+        let ec: any; try { ec = c.executionCtx; } catch { /* tests */ }
+        return app.fetch(new Request(c.req.url, { method: "POST", headers: h, body: "{}" }), c.env, ec);
+      }
       if (c.req.method !== "POST") return next();
       const v = await prevalidate(c);
       return v ?? next();
