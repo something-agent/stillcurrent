@@ -148,10 +148,25 @@ export function suggestKeyRule(k: string, allowed: Set<string>): { key: string; 
   const pre = lk.length >= 4 ? [...allowed].filter((a) => a.startsWith(lk)) : [];
   return pre.length === 1 ? { key: pre[0], rule: "prefix" } : null;
 }
+/** Why no suggestion was made: "none" = no candidate within distance 2 and no unique >=4-char prefix;
+ *  "ambiguous" = the tie rule refused (several keys at the same best distance <= 2, or several prefix matches).
+ *  Declines are labelled too, so a tie rule that became too strict shows up as a label change, not as silence (gigawatt). */
+export function declineReason(k: string, allowed: Set<string>): { rule: "none" } | { rule: "ambiguous"; candidates: string[] } {
+  const lk = k.toLowerCase();
+  let bestD = Infinity; let tied: string[] = [];
+  for (const a of allowed) { const dist = editDistance(lk, a); if (dist < bestD) { bestD = dist; tied = [a]; } else if (dist === bestD) tied.push(a); }
+  const cands = new Set<string>(bestD <= 2 && tied.length > 1 ? tied : []);
+  const pre = lk.length >= 4 ? [...allowed].filter((a) => a.startsWith(lk)) : [];
+  if (pre.length > 1) for (const a of pre) cands.add(a);
+  return cands.size > 1 ? { rule: "ambiguous", candidates: [...cands].sort() } : { rule: "none" };
+}
 // An unknown key costs the caller a round trip; name the permitted keys (and the likely intended one) in the free 422.
 function extraMsg(k: string, allowed: Set<string>): string {
   const g = suggestKeyRule(k, allowed);
-  return `Extra inputs are not permitted. Permitted keys here: ${[...allowed].join(", ")}` + (g ? `. Did you mean '${g.key}'? (rule: ${g.rule})` : "");
+  const base = `Extra inputs are not permitted. Permitted keys here: ${[...allowed].join(", ")}`;
+  if (g) return base + `. Did you mean '${g.key}'? (rule: ${g.rule})`;
+  const d = declineReason(k, allowed);
+  return base + (d.rule === "ambiguous" ? `. No single suggestion (rule: ambiguous: ${d.candidates.join("|")})` : `. No suggestion (rule: none)`);
 }
 
 export function validatePaymentVerify(raw: unknown): { ok: true; value: PaymentRequest } | { ok: false; errors: ValidationError[] } {

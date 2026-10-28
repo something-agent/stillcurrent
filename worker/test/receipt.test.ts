@@ -217,6 +217,10 @@ describe("POST /verify/payment verdicts", () => {
     expect(await j({ amount_atomi: "20000" })).toMatch(/Did you mean 'amount_atomic'\? \(rule: edit_distance\)/);
     expect(await j({ amount_usdcc: "0.02" })).toMatch(/Did you mean 'amount_usdc'\? \(rule: edit_distance\)/);
     expect(await j({ min_conf: 3 })).toMatch(/Did you mean 'min_confirmations'\? \(rule: prefix\)/);
+    expect(await j({ zebra: 1 })).toMatch(/No suggestion \(rule: none\)/);
+    expect(await j({ paye: "0x" })).toMatch(/\(rule: ambiguous: payee\|payer\)/);
+    expect(await j({ amoun: "1" })).toMatch(/\(rule: ambiguous: amount_atomic\|amount_match\|amount_usdc\)/);
+    expect(await j({ not_: 1 })).toMatch(/\(rule: ambiguous: not_after\|not_before\)/);
     expect(await j({ paye: PAYEE })).not.toMatch(/Did you mean/);
   });
 
